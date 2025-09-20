@@ -1,0 +1,453 @@
+{
+	"info": {
+		"_postman_id": "156875da-1e6a-48c3-a966-1a6e9a5cbd4b",
+		"name": "Olfa",
+		"description": "Endpoints necessários para a operação de Olfa",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "19901609"
+	},
+	"item": [
+		{
+			"name": "Fornecedor",
+			"item": [
+				{
+					"name": "1) Cadastrar fornecedor",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n  {\r\n    \"Codigo\": \"string\", // Código do fornecedor\r\n    \"RazaoSocial\": \"string\", // Razão social do fornecedor\r\n    \"Endereco\": \"string\", // Endereço do fornecedor\r\n    \"Bairro\": \"string\", // Bairro do fornecedor\r\n    \"Cidade\": \"string\", // Cidade do fornecedor\r\n    \"Uf\": \"string\", // UF do fornecedor\r\n    \"Cep\": \"string\", // Cep do fornecedor\r\n    \"Telefone\": \"string\", // telefone do fornecedor\r\n    \"IE\": \"string\", // Inscrição estadual do fornecedor\r\n    \"CNPJ_CPF\": \"string\" // CNPJ ou CPF do fornecedor\r\n  }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url-base}}}/fornecedor/incluir",
+							"host": [
+								"{{url-base}}}"
+							],
+							"path": [
+								"fornecedor",
+								"incluir"
+							]
+						},
+						"description": "Possíveis retornos para o código HTTP 200:\n\n- Fornecedor Cadastrado com Sucesso.\n    \n\nPossíveis retornos para o código HTTP 400:\n\n- Erro ao acessar o endpoint, favor comunicar ao TI\n    \n\nPossíveis retornos para o código HTTP 401:\n\n- Usuário não autorizado"
+					},
+					"response": []
+				}
+			],
+			"description": "Cadastro de fornecedor\n\nPara cadastrar o fornecedor o cliente deverá utilizar o seguinte endpoint:\n\n• Endpoint: /v1/fornecedor/incluir\n\nMétodo: POST\n\nO arquivo JSON deve ter a seguinte estrutura:\n\n\\[  \n{  \n\"Codigo\": \"string\", // Código do fornecedor  \n\"RazaoSocial\": \"string\", // Razão social do fornecedor  \n\"Endereco\": \"string\", // Endereço do fornecedor  \n\"Bairro\": \"string\", // Bairro do fornecedor  \n\"Cidade\": \"string\", // Cidade do fornecedor  \n\"Uf\": \"string\", // UF do fornecedor  \n\"Cep\": \"string\", // Cep do fornecedor  \n\"Telefone\": \"string\", // telefone do fornecedor  \n\"IE\": \"string\", // Inscrição estadual do fornecedor  \n\"CNPJ_CPF\": \"string\" // CNPJ ou CPF do fornecedor  \n}  \n\\]"
+		},
+		{
+			"name": "Produto",
+			"item": [
+				{
+					"name": "1) Cadastrar produto",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n  {\r\n    \"CodigoReferencia\": \"100414\", // Referencia da peça\r\n    \"Unidade\": \"UN\", /* Quantificação ou medida usada para representar a quantidade do produto. \r\n        Exemplo: UN, CX, PC, KG\r\n    */\r\n    \"GrupoDeProduto\": \"\", /* Nome do grupo do produto caso houver.\r\n        Exemplo: Eletronicos, Roupas, Alimentos, etc.\r\n     */\r\n    \"DescricaoProduto\": \"Lona Freio F100 67/78 Traseiro\", /* Descrição do produto */\r\n    \"Peso\": 1, /* Peso do produto */\r\n    \"Volume\": 1, /* Volume do produto */\r\n    \"CodigoDeBarras\": \"7893026203622\", /* Código EAN do produto */\r\n    \"AlmoxarifadoPadrao\": \"0001\", /* Número do almoxarifado do produto, caso não informado é atributio o almoxarifado padrão (0001) */\r\n    \"CodigoMontador\": \"CPA\", /* Código do montador */\r\n    \"ControlaNumeroDeSerie\": \"N\" /* (N) para não - (S) para sim */\r\n  }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url-base}}}/produto",
+							"host": [
+								"{{url-base}}}"
+							],
+							"path": [
+								"produto"
+							]
+						},
+						"description": "Possíveis retornos para o código HTTP 200:\n\n- Arquivo de Produto Importado com Sucesso\n    \n\nPossíveis retornos para o código HTTP 400:\n\n- Erro ao acessar o endpoint, favor comunicar ao TI\n    \n- Erro ao salvar .JSON do pedido \\[nomeArquivo\\]\n    \n\nPossíveis retornos para o código HTTP 401:\n\n- Usuário não autorizado"
+					},
+					"response": []
+				}
+			],
+			"description": "Cadastro de Produto  \nPara cadastrar produtos, o cliente deverá utilizar o seguinte endpoint:  \n• Endpoint: /v1/produto  \nMétodo: POST  \nDescrição: Cadastra um novo produto no sistema.  \nO arquivo JSON no corpo da requisição devera ter o seguinte formato:  \n\\[  \n{  \nCodigoReferencia: \"100414\", // Referência da peça  \nUnidade: \"UN\", /\\* Quantificação ou medida usada para representar a quantidade do produto. Exemplo: UN, CX, PC, KG /  \nGrupoDeProduto: \"\", / Nome do grupo do produto caso houver. Exemplo: Eletrônicos, Roupas, Alimentos etc. /  \nDescricaoProduto: \"Lona Freio F100 67/78 Traseiro\", / Descrição do produto /  \nPeso: 1, / Peso do produto /  \nVolume: 1, / Volume do produto /  \nCodigoDeBarras: \"7893026203622\", / Código EAN do produto /  \nAlmoxarifadoPadrao\" \"0001\", / Número do almoxarifado do produto, caso não informado é atributio o almoxarifado padrão (0001) /  \nCodigoMontador: \"PANI\", / Código do montador /  \nControlaNumeroDeSerie: \"N\" / (N) para não - (S) para sim \\*/  \n}  \n\\]"
+		},
+		{
+			"name": "Recebimento",
+			"item": [
+				{
+					"name": "1) Xml do fornecedor",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "File",
+									"description": "Arquivo xml referente a NFe do fornecedor",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "motivoRecusa",
+									"value": "Teste",
+									"description": "Atributo opcional, caso a entrada seja recusada",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url-base}}}/recebimento/xml-fornecedor?usuario=Teste&chaveNFeFornecedor=10175437451832470602890523335349480518666424",
+							"host": [
+								"{{url-base}}}"
+							],
+							"path": [
+								"recebimento",
+								"xml-fornecedor"
+							],
+							"query": [
+								{
+									"key": "usuario",
+									"value": "Teste",
+									"description": "Nome do usuario que está executando a ação"
+								},
+								{
+									"key": "chaveNFeFornecedor",
+									"value": "10175437451832470602890523335349480518666424",
+									"description": "Chave de 44 dígitos da NFe"
+								},
+								{
+									"key": "",
+									"value": "",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Possíveis retornos para o código HTTP 200:\n\n- Recebimento do XML do Fornecedor Autorizado por: \\[usuário autorizador\\] Data:\\[data da autorização\\] Hora:\\[hora da autorização\\]\n    \n\nPossíveis retornos para o código HTTP 400:\n\n- Erro ao acessar o endpoint, favor comunicar ao TI\n    \n- Obrigatorio o envio do arquivo xml\n    \n- Recusa do Recebimento registrado com sucesso.\n    \n\nPossíveis retornos para o código HTTP 401:\n\n- Usuário não autorizado"
+					},
+					"response": []
+				},
+				{
+					"name": "2) Consultar contagem",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url-base}}}/recebimento/contagem?chaveNFeFornecedor=10175437451832470602890523335349480518666424",
+							"host": [
+								"{{url-base}}}"
+							],
+							"path": [
+								"recebimento",
+								"contagem"
+							],
+							"query": [
+								{
+									"key": "chaveNFeFornecedor",
+									"value": "10175437451832470602890523335349480518666424",
+									"description": "Chave de 44 dígitos da NFe do fornecedor"
+								}
+							]
+						},
+						"description": "Possíveis retornos para o código HTTP 200:\n\n{  \n\"NumeroControle\": \"string\",  \n\"PedidoCompra\": \"string\",  \n\"CodFornecedor\": \"string\",  \n\"NumeroNF\": \"string\",  \n\"SerieNF\": \"string\",  \n\"DataNF\": \"string\",  \n\"Pecas\": \\[  \n{  \n\"CodigoPeca\": \"string\",  \n\"ClassificaoMercadoria\": \"string\",  \n\"NumeroSerie\": \"string\",  \n\"QtdContada\": \"string\",  \n\"retContagems\": \\[  \n{  \n\"CodigoPeca\": \"string\",  \n\"QuantidadeCe\": \"string\",  \n\"QuantidadeDaNFE\": \"string\",  \n\"Diferenca\": \"string\"  \n}  \n\\]  \n}  \n\\]  \n}\n\nPossíveis retornos para o código HTTP 400:\n\n- Erro ao acessar o endpoint, favor comunicar ao TI\n    \n- Status do recebimento nao permiti retornar informacao sobre a contagem. STATUS \\[status\\]\n    \n- Nao existe Controle de Recebimento para essa Chave Eletronica do Fornecedor Informada.\n    \n\nPossíveis retornos para o código HTTP 401:\n\n- Usuário não autorizado"
+					},
+					"response": []
+				},
+				{
+					"name": "3) Autorização do recebimento",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url-base}}}/recebimento/autorizar?usuario=Teste&chaveNFeFornecedor=10175437451832470602890523335349480518666424",
+							"host": [
+								"{{url-base}}}"
+							],
+							"path": [
+								"recebimento",
+								"autorizar"
+							],
+							"query": [
+								{
+									"key": "usuario",
+									"value": "Teste",
+									"description": "Usuário que está autorizando a entrada"
+								},
+								{
+									"key": "chaveNFeFornecedor",
+									"value": "10175437451832470602890523335349480518666424",
+									"description": "Chave de 44 dígitos referente a NFe do fornecedor "
+								}
+							]
+						},
+						"description": "Possíveis retornos para o código HTTP 200:\n\n- Entrada de Mercadoria no Estoque executada com Sucesso.\n    \n\nPossíveis retornos para o código HTTP 400:\n\n- Erro ao acessar o endpoint, favor comunicar ao TI\n    \n- Chave Eletronica do Fornecedor invalida, nao contem 44 Caracteres.\n    \n- Nao existe Controle de Recebimento para essa Chave Eletronica do Fornecedor Informada.\n    \n\nPossíveis retornos para o código HTTP 401:\n\n- Usuário não autorizado"
+					},
+					"response": []
+				},
+				{
+					"name": "4) Solicitar recontagem",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"Motivo\": \"\", // Descrição do motivo da solicitação de recontagem\r\n  \"PecaRecebimento\": [\r\n    \"100414\"\r\n  ] /* Caso não seja informado nenhum produto, \r\n  será feita a recontagem total das peças */\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url-base}}}/recebimento/recontagem?usuario=Teste&chaveNFeFornecedor=10175437451832470602890523335349480518666424",
+							"host": [
+								"{{url-base}}}"
+							],
+							"path": [
+								"recebimento",
+								"recontagem"
+							],
+							"query": [
+								{
+									"key": "usuario",
+									"value": "Teste",
+									"description": "Usuário que está solicitando a recontagem"
+								},
+								{
+									"key": "chaveNFeFornecedor",
+									"value": "10175437451832470602890523335349480518666424",
+									"description": "Chave de 44 dígitos referente a NFe do fornecedor"
+								}
+							]
+						},
+						"description": "Possíveis retornos para o código HTTP 200:\n\n- Solicitacao de Recontagem com Sucesso.\n    \n\nPossíveis retornos para o código HTTP 400:\n\n- Erro ao acessar o endpoint, favor comunicar ao TI\n    \n- Chave Eletronica do Fornecedor invalida, nao contem 44 Caracteres.\n    \n- Nao existe Controle de Recebimento para essa Chave Eletronica do Fornecedor Informada.\n    \n\nPossíveis retornos para o código HTTP 401:\n\n- Usuário não autorizado"
+					},
+					"response": []
+				}
+			],
+			"description": "O processo de recebimento inicia com a chegada da transportadora na B4You. A transportadora deve disponibilizar todas as Notas Fiscais Eletrônicas (NFe) para que um colaborador da B4You crie a minuta de recebimento.  \nApós a criação da minuta de recebimento, o sistema enviará um webhook para o cliente, notificando sobre o recebimento de cada NFe. O webhook será enviado no seguinte formato:  \nJSON  \n{  \n\"Evento\": \"AVISO_RECEBIMENTO\",  \n\"Id\": \"chave de 44 dígitos da NFe\"  \n}\n\nPassos do Processo de Recebimento\n\n1. Recepção do Webhook:  \n    O cliente deverá receber e validar o webhook enviado para cada NFe recebida.\n    \n2. Validação da NFe:  \n    \\- Se a NFe for válida:  \n     O cliente deverá enviar o usuário responsável, a chave da NFe e o arquivo XML correspondente para o seguinte endpoint:  \n     Endpoint: /v1/recebimento/xml-fornecedor  \n    Método: POST  \n    \\- Se a NFe for inválida:  \n     O cliente deverá enviar o usuário responsável, a chave da NFe, o arquivo XML e uma descrição do motivo da rejeição para o mesmo endpoint.\n    \n3. Contagem de Mercadoria:  \n    Após a entrada da NFe válida, a equipe da B4You realizará a contagem da mercadoria. Quando a contagem for concluída, o sistema enviará um novo webhook com o seguinte formato: JSON { \"Evento\": \"CONFERENCIA_RECEBIMENTO\", \"Id\": \"chave de 44 dígitos da NFe\"\n    \n    }\n    \n4. Consulta da Contagem:  \n    Após receber o webhook de conferência, o cliente deverá consultar os detalhes da contagem no seguinte endpoint:  \n    o Endpoint: /v1/recebimento/contagem  \n    Método: GET\n    \n5. Autorização de Entrada:  \n    \\- Se a contagem estiver de acordo com o esperado, o cliente deverá autorizar a entrada da mercadoria utilizando o endpoint:  \n     Endpoint: /v1/recebimento/autorizar  \n    Método: POST  \n    \\- Se a contagem não estiver correta, o cliente poderá solicitar uma recontagem no seguinte endpoint:  \n     Endpoint: /v1/recebimento/recontagem  \n    Método: POST\n    \n6. Recontagem:  \n    Quando a recontagem é solicitada, o processo retorna para a etapa de contagem pela equipe da B4You. Após a recontagem, o sistema enviará novamente o webhook de CONFERENCIA_RECEBIMENTO. O fluxo seguirá até que o cliente autorize a entrada da mercadoria.  \n    Observação:  \n    \\- A contagem final que prevalecerá será a última realizada e autorizada pelo cliente."
+		},
+		{
+			"name": "Pedido",
+			"item": [
+				{
+					"name": "1) Incluir pedido",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"NumeroPedido\": \"string\", /* Atributo que recebe o número do pedido a ser criado. */  \r\n  \"CodigoCliente\": \"string\",  /* Atributo que recebe o número do código de cliente cadastrado no WMS. */\r\n  \"DataEmissao\": \"2024-11-18\",  /* Atributo que recebe a data de emissão no padrão yyyy-MM-dd */\r\n  \"NomeCliente\": \"string\",     /* Atributo que recebe o nome do cliente */\r\n  \"EnderecoCliente\": \"string\", /* Atributo que recebe o endreço do cliente */\r\n  \"MunicipioCliente\": \"string\",   /* Atributo que recebe o municipio do cliente */\r\n  \"EstadoCliente\": \"string\",     /* Atributo que recebe o estado do cliente */\r\n  \"CnpjCpfCliente\": \"string\",     /* Atributo que recebe o CPF ou CNPJ do cliente */\r\n  \"IeCliente\": \"string\",   /* Atributo que recebe a inscrição estadual do cliente. ,  */      \r\n  \"CnpjTransportadora\": \"string\",   /* Atributo que recebe o CNPJ da transportadora */\r\n  \"CepCLiente\": \"string\", /* Atributo que recebe o CEP do cliente */\r\n  \"NumeroPedidoCLiente\": \"string\",  /* Atributo que recebe o número do pedido do cliente, caso seja diferente do informado no atributo NumeroPedido. */  \r\n  \"DataFaturamento\": \"2024-11-18\", /* Atributo no padrão yyyy-MM-dd */\r\n  \"BairroCliente\": \"string\", /* Atributo que recebe o bairro do cliente */\r\n  \"QtdItenPedido\": 0, /* Atributo que recebe a quantidade de itens do pedido */\r\n  \"TipoCanalVenda\": \"string\", /*Atributo que recebe o tipo do canal de venda do pedido, sendo eles: \r\n        1 = CORPORATIVO\r\n        2 = ATACADO\r\n        3 = TELEVENDAS\r\n        4 = SITE\r\n        5 = MARKETPLACE\r\n        7 = LICITACAO \r\n*/\r\n  \"TipoDePedido\": \"string\",  /* Atributo que recebe o tipo de pedido, sendo eles:\r\n        1 = CONSUMIDOR FINAL\r\n        2 = TRANSFERENCIA FULL\r\n        3 = TRANSFERENCIA \r\n        4 = ATACADO\r\n        5 = CORPORATIVO\r\n        6 = LICITACAO\r\n        7 = TROCA \r\n\r\n        OBS: Para os pedidos de transferência de E-commerce para Atacado favor utilizar o TipoDePedido igual a 3 ( TipoDePedido: \"3\").\r\n*/\r\n    \"Produtos\": [\r\n    {\r\n      \"NumeroPedido\": \"string\", /* Atributo que recebe o número do pedido ,  */  \r\n      \"CodigoProduto\": \"string\",/* Atributo que recebe o código do produto ,   */   \r\n      \"QtdVendida\": \"string\",  /* Atributo que recebe a quantidade de venda do produto, deve conter o separador . e 4 casas decimais ,  */    \r\n      \"PrecoVenda\": \"string\", /* Atributo que recebe o preço de venda total do produto, deve conter o separador . e 4 casas decimais ,  */     \r\n      \"ValorItem\": \"string\", /* Atributo que recebe o preço de venda unitário do produto, deve conter o separador . e 4 casas decimais ,  */\r\n      \"Almoxarifado\": \"string\", /* Atributo que recebe o almoxarifado do produto , */\r\n      \"NumeroRomaneio\": \"string\", /* Atributo que recebe o número de romaneio , */\r\n      \"SeqItens\": \"string\",   /* Atributo que recebe a ordenação do item no pedido ,  */\r\n      \"ReferenciaPedCliente\": \"string\" /* Atributo que recebe o número do pedido de referência ,  */\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url-base}}}/pedido",
+							"host": [
+								"{{url-base}}}"
+							],
+							"path": [
+								"pedido"
+							]
+						},
+						"description": "Possíveis retornos para o código HTTP 200:\n\n1. Caso o pedido não retorne dados para faturamento: Pedido Efetivado com Sucesso. \\[número do pedido\\]\n    \n2. Caso o pedido retorne dados para faturamento:\n    \n\n{\n\nDados: {\n\n```\n   Pedido: {\n       NumPedido: 653500 (string),\n       NotaFiscal: (string),\n       DataEfetivacao: string no padrão (dd/MM/yyyy),\n       Destinatario: (string),\n       QtdeItens: 1 (string),\n       QtdePecas: 1 (string),\n       DataUltStatus\": string no padrão (dd/MM/yyyy),\n       Status\": 1 (string),\n       DescricaoStatus: Aguardando Inicio Separacao (string),\n       PesoTotal: 0.12 (string),\n       TotalCaixas: 1 (string),\n       PlataFormaMarketPlace: Amazon (string),\n       CodigoMarketPlace: (string),\n       NumPlpCorreios: (string),\n       DescriServicoCorreio: (string),\n       NumContratoCorreios: (string),\n       CodigoRastreio: (string),\n       SeriesPedido: B4SMLD748852 (string)\n   },\n   StatusTimeline: {\n       Status: {\n           Status1: Aguardando Inicio Separacao (string), \n           Status2: Em Separacao (string),\n           Status3: Aguardando Checkout (string),\n           Status4: Aguardando NF p/ expedicao (string),\n           Status5: NF Recebida (string),\n           Status6: Em Carregamento (string),\n           Status7: Expedido (string),\n           Status8: Cancelado (string)\n       },\n       DataStatus: {\n           \"DataStatus1: 07/02/2024 (string),\n           \"DataStatus2: string vazia ou string no padrão (dd/MM/yyyy),\n           \"DataStatus3: string vazia ou string no padrão (dd/MM/yyyy),\n           \"DataStatus4: string vazia ou string no padrão (dd/MM/yyyy),\n           \"DataStatus5: string vazia ou string no padrão (dd/MM/yyyy),\n           \"DataStatus6: string vazia ou string no padrão (dd/MM/yyyy),\n           \"DataStatus7: string vazia ou string no padrão (dd/MM/yyyy),\n           \"DataStatus8: string vazia ou string no padrão (dd/MM/yyyy)\n       },\n       HoraStatus: {\n           HoraStatus1: 21:16:49 (string),\n           HoraStatus2: string vazia ou string no padrão (HH:mm:ss),\n           HoraStatus3: string vazia ou string no padrão (HH:mm:ss),\n           HoraStatus4: string vazia ou string no padrão (HH:mm:ss),\n           HoraStatus5: string vazia ou string no padrão (HH:mm:ss),\n           HoraStatus6: string vazia ou string no padrão (HH:mm:ss),\n           HoraStatus7: string vazia ou string no padrão (HH:mm:ss),\n           HoraStatus8: string vazia ou string no padrão (HH:mm:ss)\n       }\n   },\n   Itens: [\n       {\n           Produto: {\n               Item: 1 (string),\n               CodPeca: NAC012399 (string),\n               QtdePeca: 1 (string),\n               NumRomaneio: (string),\n               RefCliente: 1472802 (string),\n               SeriePeca: B4SMLD748852 (string)\n                }\n        }\n   ]\n\n ```\n\n}\n\n}\n\nPossíveis retornos para o código HTTP 400:\n\n- Erro ao acessar o endpoint, favor comunicar ao TI\n    \n- Falta Descricao Servico Rastreio Correios. Pedido: \\[número do pedido\\]\n    \n- Numero do Pedido diverge do Numero do Pedido do Item. Numero do Pedido: \\[número do pedido\\] Numero Pedido Item \\[número pedido no item\\]\n    \n- Falta Informacao da Plataforma Market Place. Pedido: \\[número do pedido\\]\n    \n- Falta Numero do Pedido Integrador Market Place. Pedido: \\[número do pedido\\]\n    \n- Pedido ja existente no Sistema. \\[número do pedido\\] Data de Efetivacao do Pedido: dd/MM/yyyy\n    \n- Saldo Insuficiente: Qtd disponivel: \\[X\\] Qtd Solicitada: \\[X\\] Pedido Bloqueado: \\[número pedido\\] Item: \\[X\\] Produto: \\[código do produto\\]\n    \n- NumeroPedido é um atributo obrigátorio\n    \n- DataEmissao no padrão yyyy-MM-dd é um atributo obrigatório\n    \n- NomeCliente é um atributo obirgatório\n    \n- EnderecoCliente é um atributo obrigatório\n    \n- MunicipioCliente é um atributo obrigatório\n    \n- EstadoCliente é um atributo obrigatório\n    \n- Campo CnpjCpfCliente deve conter no minimo 11 e no maximo 14 digitos\n    \n- CepCliente é um atributo obrigatório\n    \n- DataFaturamento no padrão yyyy-MM-dd é um atributo obrigatório\n    \n- BairroCliente é um atributo obrigatório\n    \n- A HrAprovacaoMarketPlace deve está no formato HH:mm:ss\n    \n- A HrInsercaoErpCliente deve está no formato HH:mm:ss\n    \n- Atributo QtdItenPedido é obrigatório\n    \n- O pedido deve conter ao menos um produto\n    \n- NumeroPedido no produto é um atributo obrigatório\n    \n- CodigoProduto é um atributo obrigatório\n    \n- Atributo QtdVendida é obrigatório\n    \n- A QtdVendida está em um formato inválido, deve conter 4 casas decimais separadas por .\n    \n- O PrecoVenda está em um formato inválido, deve conter 4 casas decimais separadas por .\n    \n- O ValorItem está em um formato inválido, deve conter 4 casas decimais separadas por .\n    \n- SeqItens é um atributo obrigatório\n    \n- Pedido Numero: \\[número do pedido\\] Codigo de Produto nao Cadastrado \\[código de barras\\]\n    \n\nPossíveis retornos para o código HTTP 401:\n\n- Usuário não autorizado"
+					},
+					"response": []
+				},
+				{
+					"name": "2) Vincular XML NFe ao pedido",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "/* OBS: As strings em base64 são a título de exemplo, não refletindo dados reais. */\r\n\r\n{\r\n  \"NumeroPedido\": \"\", // Número do pedido referente ao arquivo XML.\r\n  \"Xml\": \"YWFzYWFmZGZnZmRnemdmZ3NmZHNmZHNmc2RkZnNkZnNkZmRmc2Rmc2VyZWZkc2Zl\", // Arquivo XML referente a NFe códificado em base64.\r\n  \"EtiquetaZpl\": \"YWFzYWFmZGZnZmRnemdmZ3NmZHNmZHNmc2RkZnNkZnNkZmRmc2Rmc2VyZWZkc2Zl\", // Etiqueta ZPL codificada em base64 (Caso a etiqueta for ZPL).\r\n  \"EtiquetaPdf\": \"YWFzYWFmZGZnZmRnemdmZ3NmZHNmZHNmc2RkZnNkZnNkZmRmc2Rmc2VyZWZkc2Zl\", /* Etiqueta PDF codificada em base64 (Caso a etiqueta for PDF). \r\n   *Lembrando que o arquivo PDF deve conter somente a etiqueta sem espaços em branco nas laterais. */\r\n  \"NfPdf\": \"YWFzYWFmZGZnZmRnemdmZ3NmZHNmZHNmc2RkZnNkZnNkZmRmc2Rmc2VyZWZkc2Zl\" // PDF referente a NFe codificado em base 64.   \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url-base}}}/pedido/xml-json",
+							"host": [
+								"{{url-base}}}"
+							],
+							"path": [
+								"pedido",
+								"xml-json"
+							]
+						},
+						"description": "Possíveis retornos para o código HTTP 200:\n\n- Processo executado com Sucesso....Numero NF: \\[número da NF\\]\n    \n\nPossíveis retornos para o código HTTP 400:\n\n- Extensão de arquivo em formato inválido, corretos: (.zpl ou .pdf)\n    \n- Erro ao acessar o endpoint, favor comunicar ao TI\n    \n\nPossíveis retornos para o código HTTP 401:\n\n- Usuário não autorizado"
+					},
+					"response": []
+				},
+				{
+					"name": "3) Consultar pedido",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url-base}}}/pedido?numeroPedido=0000003",
+							"host": [
+								"{{url-base}}}"
+							],
+							"path": [
+								"pedido"
+							],
+							"query": [
+								{
+									"key": "numeroPedido",
+									"value": "0000003",
+									"description": "Número do pedido a ser consultado"
+								}
+							]
+						},
+						"description": "Possíveis retornos para o códgio HTTP 200:\n\n\\[\n\n{\n\n\"Dados\": {  \n\"Pedido\": {  \n\"NumPedido\": \"99999\",  \n\"NotaFiscal\": \"\",  \n\"DataEfetivacao\": \"15/10/2022\",  \n\"Destinatario\": \"Destinatario\",  \n\"QtdeItens\": \"3\",  \n\"QtdePecas\": \"4\",  \n\"DataUltStatus\": \"15/10/2022\",  \n\"Status\": \"1\",  \n\"DescricaoStatus\": \"Aguardando Inicio Separacao\",  \n\"PesoTotal\": \"0\",  \n\"TotalCaixas\": \"0\",  \n\"PlataFormaMarketPlace\": \"Marketplace\",  \n\"CodigoMarketPlace\": \"99999\",  \n\"NumPlpCorreios\": \"\",  \n\"DescriServicoCorreio\": \"\",  \n\"NumContratoCorreios\": \"\",  \n\"SeriesPedido\": \"\"  \n},  \n\"StatusTimeline\": {  \n\"Status\": {  \n\"Status1\": \"Aguardando Inicio Separacao\",  \n\"Status2\": \"Em Separacao\",  \n\"Status3\": \"Aguardando Checkout\",  \n\"Status4\": \"Aguardando NF p/ expedicao\",  \n\"Status5\": \"NF Recebida\",  \n\"Status6\": \"Em Carregamento\",  \n\"Status7\": \"Expedido\",  \n\"Status8\": \"Cancelado\"  \n},  \n\"DataStatus\": {  \n\"DataStatus1\": \"15/10/2022\",  \n\"DataStatus2\": \"\",  \n\"DataStatus3\": \"\",  \n\"DataStatus4\": \"\",  \n\"DataStatus5\": \"\",  \n\"DataStatus6\": \"\",  \n\"DataStatus7\": \"\",  \n\"DataStatus8\": \"\"  \n},  \n\"HoraStatus\": {  \n\"HoraStatus1\": \"04:48:01\",  \n\"HoraStatus2\": \"\",  \n\"HoraStatus3\": \"\",  \n\"HoraStatus4\": \"\",  \n\"HoraStatus5\": \"\",  \n\"HoraStatus6\": \"\",  \n\"HoraStatus7\": \"\",  \n\"HoraStatus8\": \"\"  \n}  \n},  \n\"Itens\": \\[  \n{  \n\"Produto\": {  \n\"Item\": \"1\",  \n\"CodPeca\": \"999999\",  \n\"QtdePeca\": \"2\",  \n\"NumRomaneio\": \"\",  \n\"RefCliente\": \"99999\",  \n\"SeriePeca\": \"\"  \n}  \n},  \n{  \n\"Produto\": {  \n\"Item\": \"2\",  \n\"CodPeca\": \"999999\",  \n\"QtdePeca\": \"1\",  \n\"NumRomaneio\": \"\",  \n\"RefCliente\": \"99999\",  \n\"SeriePeca\": \"\"  \n}  \n},  \n{  \n\"Produto\": {  \n\"Item\": \"3\",  \n\"CodPeca\": \"999999\",  \n\"QtdePeca\": \"1\",  \n\"NumRomaneio\": \"\",  \n\"RefCliente\": \"99999\",  \n\"SeriePeca\": \"\",  \n\"Embalagens\": \\[  \n{  \n\"Caixa\": \"A\"  \n\"Quantidade\": \"10\"  \n},  \n...  \n\\]\n\n}\n\n}\n\n\\]  \n}  \n}\n\n\\]\n\nPossíveis retornos para o código HTTP 400:\n\n- Sem pedido\n    \n- Pedido nao encontrado\n    \n- Sem pedido para esse status\n    \n- Erro ao acessar o endpoint, favor comunicar ao TI\n    \n\nPossíveis retornos para o código HTTP 401:\n\n- Usuário não autorizado"
+					},
+					"response": []
+				},
+				{
+					"name": "4) Cancelar pedido",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "/*\r\n   OBS: Quando um pedido é cancelado, ele permanece na base principal, o que impede o reenvio do mesmo.\r\n   Se o objetivo for cancelar e depois reenviar o pedido, \r\n   utilize o endpoint \"Deletar pedido\" para removê-lo da base e possibilitar o reenvio.\r\n*/\r\n{\r\n  \"NumeroPedido\": \"\", // Número do pedido a ser cancelado\r\n  \"MotivoCancelamento\": \"\", // Motivo do cancelamento\r\n  \"Usuario\": \"\" // Nome do usuário que está solicitando o cancelamento\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url-base}}}/pedido/cancelar",
+							"host": [
+								"{{url-base}}}"
+							],
+							"path": [
+								"pedido",
+								"cancelar"
+							]
+						},
+						"description": "Possíveis retornos para o código HTTP 200:\n\n- Pedido cancelado com sucesso. \\[número do pedido\\]\n    \n\nPossíveis retornos para o código HTTP 400:\n\n- Erro ao acessar o endpoint, favor comunicar a TI\n    \n- Numero do Pedido Invalido. \\[número pedido\\]\n    \n- Pedido Inexistente no Sistema. \\[número do pedido\\]\n    \n- Pedido Ja Cancelado no Sistema. \\[número do pedido\\]\n    \n\nPossíveis retornos para o código HTTP 401:\n\n- Usuário não autorizado"
+					},
+					"response": []
+				},
+				{
+					"name": "6) Deletar pedido",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "/*\r\n    Utilizado para deletar o pedido.\r\n*/\r\n\r\n{\r\n  \"NumeroPedido\": \"\", // Número do pedido a ser deletado\r\n  \"MotivoCancelamento\": \"\", // Motivo da deleção\r\n  \"Usuario\": \"\" // Nome do usuário que está solicitando a deleção\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url-base}}/pedido/deletar",
+							"host": [
+								"{{url-base}}"
+							],
+							"path": [
+								"pedido",
+								"deletar"
+							]
+						},
+						"description": "Possíveis retornos para o código HTTP 200:\n\n- Pedido excluido com sucesso. \\[número do pedido\\]\n    \n\nPossíveis retornos para o código HTTP 400:\n\n- Erro ao acessar o endpoint, favor comunicar a TI\n    \n- Numero do Pedido Invalido. \\[número pedido\\]\n    \n- Pedido Inexistente no Sistema. \\[número do pedido\\]\n    \n- Pedido se econtra com Status \\[status do pedido\\] que nao permite Delecao de Imediato. Favor entrar em contato com o Administrativo B4YOU.\n    \n\nPossíveis retornos para o código HTTP 401:\n\n- Usuário não autorizado"
+					},
+					"response": []
+				}
+			],
+			"description": "---\n\nIncluir pedido\n\nPara incluir um pedido o cliente deverá utilizar o seguinte endpoint:\n\n• Endpoint: /v1/pedido\n\nMétodo: POST\n\nO arquivo JSON deve ter a seguinte estrutura:\n\n{  \n\"NumeroPedido\": \"string\", /\\* Atributo que recebe o número do pedido a ser criado. _/__\"CodigoCliente\": \"string\", /_ Atributo que recebe o número do código de cliente cadastrado no WMS. _/__\"DataEmissao\": \"2024-11-18\", /_ Atributo que recebe a data de emissão no padrão yyyy-MM-dd _/__\"NomeCliente\": \"string\", /_ Atributo que recebe o nome do cliente _/__\"EnderecoCliente\": \"string\", /_ Atributo que recebe o endreço do cliente _/__\"MunicipioCliente\": \"string\", /_ Atributo que recebe o municipio do cliente _/__\"EstadoCliente\": \"string\", /_ Atributo que recebe o estado do cliente _/__\"CnpjCpfCliente\": \"string\", /_ Atributo que recebe o CPF ou CNPJ do cliente _/__\"IeCliente\": \"string\", /_ Atributo que recebe a inscrição estadual do cliente. , _/__\"CnpjTransportadora\": \"string\", /_ Atributo que recebe o CNPJ da transportadora _/__\"CepCLiente\": \"string\", /_ Atributo que recebe o CEP do cliente _/__\"NumeroPedidoCLiente\": \"string\", /_ Atributo que recebe o número do pedido do cliente, caso seja diferente do informado no atributo NumeroPedido. _/__\"DataFaturamento\": \"2024-11-18\", /_ Atributo no padrão yyyy-MM-dd _/__\"BairroCliente\": \"string\", /_ Atributo que recebe o bairro do cliente _/__\"QtdItenPedido\": 0, /_ Atributo que recebe a quantidade de itens do pedido _/__**\"TipoCanalVenda\": \"string\", /\\*Atributo que recebe o tipo do canal de venda do pedido,**__sendo eles:__**1 = CORPORATIVO**__2 = ATACADO__3 = TELEVENDAS__4 = SITE__5 = MARKETPLACE__6 = LICITACAO__\\*/__\"TipoDePedido\": \"string\", /_ Atributo que recebe o tipo de pedido,  \nsendo eles:  \n1 = CONSUMIDOR FINAL  \n2 = TRANSFERENCIA FULL  \n3 = TRANSFERENCIA  \n4 = ATACADO  \n5 = CORPORATIVO  \n6 = LICITACAO  \n7 = TROCA  \nOBS: Para os pedidos de transferência de E-commerce para Atacado favor utilizar o TipoDePedido igual a 3 (TipoDePedido: \"3\").  \n_/__**\"Produtos\": \\[**__{__\"NumeroPedido\": \"string\", /_ Atributo que recebe o número do pedido , _/__\"CodigoProduto\": \"string\",/_ Atributo que recebe o código do produto , _/__\"QtdVendida\": \"string\", /_ Atributo que recebe a quantidade de venda do produto, deve conter o separador . e 4 casas decimais , _/__\"PrecoVenda\": \"string\", /_ Atributo que recebe o preço de venda total do produto, deve conter o separador . e 4 casas decimais , _/__\"ValorItem\": \"string\", /_ Atributo que recebe o preço de venda unitário do produto, deve conter o separador . e 4 casas decimais , _/__\"Almoxarifado\": \"string\", /_ Atributo que recebe o almoxarifado do produto , _/__\"NumeroRomaneio\": \"string\", /_ Atributo que recebe o número de romaneio , _/__\"SeqItens\": \"string\", /_ Atributo que recebe a ordenação do item no pedido , _/__\"ReferenciaPedCliente\": \"string\" /_ Atributo que recebe o número do pedido de referência , \\*/  \n}  \n\\]  \n}\n\n---\n\nConsultar Pedido\n\nPara consultar um pedido já criado, o cliente deverá utilizar o seguinte endpoint:  \n• Endpoint: /v1/pedido  \nMétodo: GET  \nDescrição: Consulta o pedido informado na requisição.\n\n---\n\nCancelar Pedido\n\nPara cancelar um pedido, o cliente deverá enviar um arquivo JSON no corpo da requisição para o seguinte endpoint:\n\n• Endpoint: /v1/pedido/cancelar  \nMétodo: POST  \nDescrição: Cancela um pedido, mantendo-o na base principal.\n\nO arquivo JSON deve ter a seguinte estrutura:  \n{  \n\"NumeroPedido\": \"\", // Número do pedido a ser cancelado.  \n\"MotivoCancelamento\": \"\", // Motivo do cancelamento.  \n\"Usuario\": \"\" // Nome do usuário que está solicitando o cancelamento.  \n}\n\nObservação:\n\nQuando um pedido é cancelado, ele permanece na base de dados principal, o que impede o reenvio do mesmo.\n\nSe o objetivo for cancelar o pedido e permitir o reenvio posteriormente, utilize o endpoint Deletar Pedido.\n\n---\n\nDeletar Pedido\n\nPara deletar um pedido da base de dados, o cliente deverá enviar um arquivo JSON no corpo da requisição para o seguinte endpoint:\n\n• Endpoint: /v1/pedido/deletar  \nMétodo: POST  \nDescrição: Remove o pedido da base de dados, possibilitando seu reenvio.\n\nO arquivo JSON deve ter a seguinte estrutura:  \n{  \n\"NumeroPedido\": \"\", // Número do pedido a ser deletado.  \n\"MotivoCancelamento\": \"\", // Motivo da deleção.  \n\"Usuario\": \"\" // Nome do usuário que está solicitando a deleção.  \n}"
+		},
+		{
+			"name": "Estoque",
+			"item": [
+				{
+					"name": "Consulta de produto",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url-base}}}/estoque/{codigo-produto}",
+							"host": [
+								"{{url-base}}}"
+							],
+							"path": [
+								"estoque",
+								"{codigo-produto}"
+							]
+						},
+						"description": "Possíveis retornos para o códgio HTTP 200:\n\n\\[  \n{  \nNumPeca: (string),  \nMontador: (string),  \nNumDI: (string),  \nAlmox: (string),  \nQtdDisponivel: (int),  \nQtdReservada: (int),  \nQtdTotal: (int)  \n}  \n\\]\n\nPossíveis retornos para o código HTTP 400:\n\n- Erro ao acessar o endpoint, favor comunicar ao TI\n    \n\nPossíveis retornos para o código HTTP 401:\n\n- Usuário não autorizado"
+					},
+					"response": []
+				}
+			],
+			"description": "Consulta de saldo"
+		}
+	],
+	"auth": {
+		"type": "basic",
+		"basic": [
+			{
+				"key": "password",
+				"value": "2my6eqcxia8t4pb91ls5dwho",
+				"type": "string"
+			},
+			{
+				"key": "username",
+				"value": "OLFA",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "url-base",
+			"value": "https://api.b4youlog.com/sandbox/v1",
+			"type": "string"
+		}
+	]
+}
