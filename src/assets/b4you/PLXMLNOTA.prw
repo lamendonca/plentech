@@ -41,22 +41,22 @@ User Function PLXMLNOTA(xCXMLNFE)
 				If !zIsLock('SF2', SF2->(RecNo()))
 					SF2->(MsUnlock())
 				EndIf
-				Begin Transaction
-					//Atualiza tabela
-					If !Empty(cProtocolo)
-						// RecLock("SF2", .F.)// TODO: remover
-						// SF2->F2_FIMP := "S"// TODO: remover
-						// SF2->F2_CHVNFE := SubStr(NfeIdSPED(aXML[nX][2],"Id"),4)// TODO: remover
-						// SF2->(MsUnlock())// TODO: remover
-						// Xml da NF para integrar com a plataforma Set Canhoto
-						xCXMLNFE := aXML[nX][2]
-					EndIf
-					If cCodRet $ RetCodDene() // Uso Denegado
-						// RecLock("SF2", .F.) // TODO: remover
-						// SF2->F2_FIMP := "D" // TODO: remover
-						// SF2->(MsUnlock())// TODO: remover 
-					EndIf
-				End Transaction
+				// Begin Transaction
+				// 	//Atualiza tabela
+				// 	If !Empty(cProtocolo)
+				// 		// RecLock("SF2", .F.)
+				// 		// SF2->F2_FIMP := "S"
+				// 		// SF2->F2_CHVNFE := SubStr(NfeIdSPED(aXML[nX][2],"Id"),4)
+				// 		// SF2->(MsUnlock())
+				// 		// Xml da NF para integrar com a plataforma Set Canhoto
+				// 		xCXMLNFE := aXML[nX][2]
+				// 	EndIf
+				// 	If cCodRet $ RetCodDene() // Uso Denegado
+				// 		// RecLock("SF2", .F.) 
+				// 		// SF2->F2_FIMP := "D" 
+				// 		// SF2->(MsUnlock()) 
+				// 	EndIf
+				// End Transaction
 			Next nX
 		Else
 			Aviso("SPED","Execute o módulo de configuração do serviço, antes de utilizar esta opção!!!",{"OK"},3)	 //"Execute o módulo de configuração do serviço, antes de utilizar esta opção!!!"

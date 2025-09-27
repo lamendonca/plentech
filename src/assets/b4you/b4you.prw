@@ -27,7 +27,7 @@
 // B1_XB4U - C - Tam 1      := Field to mark products to be sent to B4U (S = Yes; C= Canceled; 1= Priority to send; blank = Not sent)
 // B1_XB4UJSO - Memo        := Field to store the JSON sent to B4U
 
-//Fields to validate use in the API (TODO: Create these fields in the respective tables)
+//Fields to validate use in the API
 // SC5 - Orders
 // DataFaturamento          := Field to store the billing date
 // TipoCanalVenda           := Field to store the sales channel type
@@ -69,7 +69,6 @@ User Function xTestB4U(_Method, _Order)
 
     Local _cEmp         := "01"     // Company code - Check your company code in SM0->M0_CODIGO
     Local _cFil         := "0207"   // Sucursal code - Check your filial code in SM0->M0_CODFIL
-    Private lTest       := .T.      //TODO: Remove it before go to production
     Default _Method     := "Cancel"  // Default method to test
     Default _Order      := "027616" // Default order number to test
     If Select("SX2") == 0
@@ -79,7 +78,7 @@ User Function xTestB4U(_Method, _Order)
         CreateB4YouLogProduct( "030625" )// Test product creation
     elseif lower(_Method) == lower("Order")
         ConnectB4YouLogOrder(_Order)              // Test order creation
-    elseif lower(_Method) == lower("Cancel")  //TODO: Not possible to cancel a order across Httpquo
+    elseif lower(_Method) == lower("Cancel")  
         CancelB4YouLogOrder(_Order)               // Test order cancellation
     elseif lower(_Method) == lower("SendXmlJson")
         SendB4YouLogPedidoXmlJson(_Order) // Test sending XML/JSON data
@@ -149,14 +148,14 @@ Static Function ConnectB4YouLogOrder(_Order)
         oOrder["DataEmissao"]               := SUBSTRING(DTOS(SC5->C5_EMISSAO),1,4)+'-'+SUBSTRING(DTOS(SC5->C5_EMISSAO),5,2)+'-'+SUBSTRING(DTOS(SC5->C5_EMISSAO),7,2)
         oOrder["CnpjTransportadora"]        := Posicione("SA4", 1, xFilial("SA4")+SC5->C5_TRANSP, "A4_CGC")
 
-        oOrder["DataFaturamento"]           := SUBSTRING(DTOS(SC5->C5_EMISSAO),1,4)+'-'+SUBSTRING(DTOS(SC5->C5_EMISSAO),5,2)+'-'+SUBSTRING(DTOS(SC5->C5_EMISSAO),7,2)//TODO: Validar uso do campo
-        oOrder["TipoCanalVenda"]            := "4"                  // 1 = CORPORATIVO; 2 = ATACADO; 3 = TELEVENDAS; 4 = SITE; 5 = MARKETPLACE; 7 = LICITACAO //TODO: Validar uso do campo
-        oOrder["TipoDePedido"]              := "1"                  // 1 = CONSUMIDOR FINAL; 2 = TRANSFERENCIA FULL; 3 = TRANSFERENCIA; 4 = ATACADO; 5 = CORPORATIVO; 6 = LICITACAO; 7 = TROCA //TODO: Validar uso do campo
+        oOrder["DataFaturamento"]           := SUBSTRING(DTOS(SC5->C5_EMISSAO),1,4)+'-'+SUBSTRING(DTOS(SC5->C5_EMISSAO),5,2)+'-'+SUBSTRING(DTOS(SC5->C5_EMISSAO),7,2)
+        oOrder["TipoCanalVenda"]            := "4"                  // 1 = CORPORATIVO; 2 = ATACADO; 3 = TELEVENDAS; 4 = SITE; 5 = MARKETPLACE; 7 = LICITACAO 
+        oOrder["TipoDePedido"]              := "1"                  // 1 = CONSUMIDOR FINAL; 2 = TRANSFERENCIA FULL; 3 = TRANSFERENCIA; 4 = ATACADO; 5 = CORPORATIVO; 6 = LICITACAO; 7 = TROCA 
         oOrder["OrdemDeCompra"]             := ""
         oOrder["NumeroPedidoCLiente"]       := ""
 
         // Clientes
-        IF SA1->(Found()) .and. lTest
+        IF SA1->(Found())
             oOrder["NomeCliente"]           := SA1->A1_NOME
             oOrder["EnderecoCliente"]       := SA1->A1_END
             oOrder["BairroCliente"]         := SA1->A1_BAIRRO
@@ -256,29 +255,17 @@ Static Function CreateB4YouLogProduct(_Product)
     SB1->(DBSeek(xFilial("SB1")+ _Product ))
 
     if SB1->(Found())
-        if lTest
-            oProduct["CodigoReferencia"]        := Alltrim(SB1->B1_COD)
-            oProduct["Unidade"]                 := SB1->B1_UM
-            oProduct["GrupoDeProduto"]          := SB1->B1_GRUPO
-            oProduct["DescricaoProduto"]        := Alltrim(SB1->B1_DESC)
-            oProduct["Peso"]                    := SB1->B1_PESO
-            oProduct["Volume"]                  := Val("1")
-            oProduct["CodigoDeBarras"]          := Alltrim(SB1->B1_CODBAR)
-            oProduct["AlmoxarifadoPadrao"]      := ""   //Not able to use //StrZero(Val(SB1->B1_LOCPAD),4)
-            oProduct["CodigoMontador"]          := ""   // Not able to use
-            oProduct["ControlaNumeroDeSerie"]   := "N"
-        else
-            oProduct["CodigoReferencia"]        := "Descricao Produto"//Alltrim(SB1->B1_COD)
-            oProduct["Unidade"]                 := SB1->B1_UM
-            oProduct["GrupoDeProduto"]          := SB1->B1_GRUPO
-            oProduct["DescricaoProduto"]        := Alltrim(SB1->B1_DESC)
-            oProduct["Peso"]                    := SB1->B1_PESO
-            oProduct["Volume"]                  := Val("1")
-            oProduct["CodigoDeBarras"]          := Alltrim(SB1->B1_CODBAR)
-            oProduct["AlmoxarifadoPadrao"]      := ""
-            oProduct["CodigoMontador"]          := ""                   // Not able to use
-            oProduct["ControlaNumeroDeSerie"]   := "N"
-        end
+        oProduct["CodigoReferencia"]        := Alltrim(SB1->B1_COD)
+        oProduct["Unidade"]                 := SB1->B1_UM
+        oProduct["GrupoDeProduto"]          := SB1->B1_GRUPO
+        oProduct["DescricaoProduto"]        := Alltrim(SB1->B1_DESC)
+        oProduct["Peso"]                    := SB1->B1_PESO
+        oProduct["Volume"]                  := Val("1")
+        oProduct["CodigoDeBarras"]          := Alltrim(SB1->B1_CODBAR)
+        oProduct["AlmoxarifadoPadrao"]      := ""   //Not able to use //StrZero(Val(SB1->B1_LOCPAD),4)
+        oProduct["CodigoMontador"]          := ""   // Not able to use
+        oProduct["ControlaNumeroDeSerie"]   := "N"
+
         u_PlenMsg("Criando produto: " + _Product + " - "+ SB1->B1_DESC, "CreateB4YouLogProduct")
 
         // Deserialize the returned JSON from the API
@@ -424,7 +411,6 @@ Static Function _FoundXml( cOption, Serie, Nota, Cliente, Loja, Filial, xData )
     Local xCXMLNFE      := "" //XML data of the invoice
     Do Case
         Case cOption == "XML"
-            // TODO: carregar XML real (ex.: a partir da SF2/SD2, tabela própria, ou caminho em MV)
             U_PLXMLNOTA(@xCXMLNFE)
             cReturn := Encode64(xCXMLNFE) // Return the XML data
         Case cOption == "EtiquetaZpl"

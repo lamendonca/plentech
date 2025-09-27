@@ -77,7 +77,6 @@ Static Function updateSC5( Sucursal, Order, Status, Message  )
     if SC5->(Found())
         lRet := .T.
         u_PlenMsg("Pedido encontrado: " + Sucursal + Order, "restB4U", "B4U")
-        //TODO: Remove the comments
         if fieldPos("C5_B4USTA") > 0 .and. fieldPos("C5_XB4UJSO") > 0 // Check if the fields exist
             if !(SB1->C5_B4USTA == "S")
                 RecLock("SC5",.F. )
