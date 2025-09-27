@@ -84,13 +84,13 @@ Static Function jsonClient(cAlias)
 Return {oCustomers:toJson(),lRet}
 
 
-User function upAltCustomer(_cNome, _cNomeReduz,_cInsc,  _cCep, _cEnd, _cBairro, _cEst, _cMunc, _cEmail, _cTel, _cCodCli, _cLojaCli, cCGC, active)
+User function upAltCustomer(_cNome, _cNomeReduz,_cInsc,  _cCep, _cEnd, _cBairro, _cEst, _cMunc, _cEmail, _cTel, _cCodCli, _cLojaCli, cCGC, active, _cCodMun)
     Local aReturn := {}
 
     aReturn := vldCustomer(_cCodCli, _cLojaCli ) // validate if the client exists
     If aReturn[2] // if true, client exists and can be altered
 
-        aReturn := fRecordCli(  _cNome, _cNomeReduz,_cInsc,  _cCep, _cEnd, _cBairro, _cEst, _cMunc, _cEmail, _cTel, _cCodCli, _cLojaCli, cCGC, active)
+        aReturn := fRecordCli(  _cNome, _cNomeReduz,_cInsc,  _cCep, _cEnd, _cBairro, _cEst, _cMunc, _cEmail, _cTel, _cCodCli, _cLojaCli, cCGC, active, _cCodMun)
 
     EndIf
 
@@ -117,7 +117,7 @@ Static Function vldCustomer(Customer, Sucursal, _cMsg)
     oReturn["Processo"] := _cMsg
 Return {oReturn:toJson(), lRet}
 
-Static Function fRecordCli(  __cNome, _cNomeReduz,_cInsc,  _cCep, _cEnd, _cBairro, _cEst, _cMunc, _cEmail, _cTel, _cCodCli, _cLojaCli, cCGC, active)
+Static Function fRecordCli(  __cNome, _cNomeReduz,_cInsc,  _cCep, _cEnd, _cBairro, _cEst, _cMunc, _cEmail, _cTel, _cCodCli, _cLojaCli, cCGC, active, _cCodMun)
 
     Local lOk     := .F.
     Local oReturn       := JsonObject():New()
@@ -137,14 +137,13 @@ Static Function fRecordCli(  __cNome, _cNomeReduz,_cInsc,  _cCep, _cEnd, _cBairr
     oSA1Mod:setValue("A1_END"     ,   _cEnd          )
     oSA1Mod:setValue("A1_BAIRRO"  ,   _cBairro       )
     oSA1Mod:setValue("A1_EST"     ,   _cEst          )
-    // oSA1Mod:setValue("A1_COD_MUN" ,   _cCodMun       )  //TODO: need to fix this
     oSA1Mod:setValue("A1_MUN"     ,   _cMunc         )
-    // oSA1Mod:setValue("A1_PAIS"    ,   SA1->A1_PAIS   )
     oSA1Mod:setValue("A1_EMAIL"   ,   _cEmail        )
-    // oSA1Mod:setValue("A1_DDD"     ,   SA1->A1_DDD    )
     oSA1Mod:setValue("A1_TEL"     ,   _cTel          )
     oSA1Mod:setValue("A1_CGC"     ,   cCGC           )
     oSA1Mod:setValue("A1_MSBLQL"  ,   active         )
+    oSA1Mod:setValue("A1_TIPO"    ,   ""              ) // TIPO DE PESSOA // 1 = Fisica ; 2 = Juridica
+    oSA1Mod:setValue("A1_COD_MUN" ,   _cCodMun        ) // CODIGO DO MUNICIPIO
 
     If oModel:VldData()
 
@@ -182,7 +181,7 @@ Static Function fRecordCli(  __cNome, _cNomeReduz,_cInsc,  _cCep, _cEnd, _cBairr
 Return {oReturn:toJson(), lOk}
 
 
-User Function upIncCustomer(_cNome, _cNomeReduz, _cInsc,  _cCep, _cEnd, _cBairro,_cEst, _cMunc, _cEmail, _cTel, _cCodCli, _cLojaCli, _cCgc)
+User Function upIncCustomer(_cNome, _cNomeReduz, _cInsc,  _cCep, _cEnd, _cBairro,_cEst, _cMunc, _cEmail, _cTel, _cCodCli, _cLojaCli, _cCgc, _cCodMun)
 
     Local lOk           := .F.
     Local cCod          := ""
@@ -194,15 +193,7 @@ User Function upIncCustomer(_cNome, _cNomeReduz, _cInsc,  _cCep, _cEnd, _cBairro
     oModel:SetOperation(3)
     oModel:Activate()
 
-    //------------------------------------------------
-    // Verificar se ja existe o cadastro
-    //------------------------------------------------
-    If !(fConsultCli(@cCod, @_cLojaCli,_cCgc))
-        //------------------------------------------------
-        // Funcao para buscar o proximo cod
-        //------------------------------------------------
-        fBuscaNextNum(@cCod)
-    EndIf
+    fConsultCli(@cCod, @_cLojaCli,_cCgc) // get the number of A1_COD and A1_LOJA
 
     oSA1Mod:= oModel:getModel("MATA030_SA1")
     //TODO: VALIDATE MANDATORY FIELDS
@@ -222,7 +213,8 @@ User Function upIncCustomer(_cNome, _cNomeReduz, _cInsc,  _cCep, _cEnd, _cBairro
     oSA1Mod:setValue("A1_TEL"     ,   _cTel           ) // TELEFONE
     oSA1Mod:setValue("A1_CODPAIS" ,   "01058"         ) // CODIGO DO PAIS - DEFAULT  01058
     oSA1Mod:setValue("A1_CONTRIB" ,   "2"             ) // CONTRIBUINTE // 2 = Não Contribuinte ; 1 = Contribuinte
-
+    oSA1Mod:setValue("A1_TIPO"    ,   ""              ) // TIPO DE PESSOA // 1 = Fisica ; 2 = Juridica
+    oSA1Mod:setValue("A1_COD_MUN" ,   _cCodMun        ) // CODIGO DO MUNICIPIO
     //Valida as informacoes
     If oModel:VldData()
 
@@ -263,14 +255,6 @@ User Function upIncCustomer(_cNome, _cNomeReduz, _cInsc,  _cCep, _cEnd, _cBairro
 
 Return { oReturn:toJson(), lOk }
 
-Static Function fBuscaNextNum(cCod)
-    cCod := GETSXENUM("SA1", "A1_COD")
-    While SA1->(DbSeek(xFilial("SA1") + cCod))
-        ConfirmSX8()
-        cCod := GETSXENUM("SA1", "A1_COD")
-    EndDo
-Return
-
 Static Function fConsultCli(cCod, _cLojaCli, _cCgc)
 
     Local _cAliasCli    :=  GetNextAlias()
@@ -294,6 +278,9 @@ Static Function fConsultCli(cCod, _cLojaCli, _cCgc)
         cCod        := (_cAliasCli)->A1_COD
         (_cAliasCli)->(DbCloseArea())
         Return(.T.)
+    else
+        _cLojaCli   := strzero("01",TamSX3("A1_LOJA")[1]) // Fully with zeros before the 1 until the size of the field
+        cCod        := SubStr(_cCGC,1,8) // return 8 first digits of CNPJ/CPF
     EndIf
 
 Return(.F.)

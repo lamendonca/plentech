@@ -65,7 +65,7 @@ WSMETHOD POST Cliente WSSERVICE upVendas
     Local _cLojaCli     := ""
     Local _cCgc         := ""
     Local __Active      := "2" //1=Inativo;2=Ativo                                                                                                               
-
+    Local _cCodMun      := "" // Codigo do Municipio
 
     Local cJSON          := Self:GetContent()
     Private oJson        := JsonObject():New()
@@ -84,13 +84,13 @@ WSMETHOD POST Cliente WSSERVICE upVendas
 
     cAction    := AllTrim(oJson:GetJsonText("action")) // Incluir ou Alterar
 
-    BreakingJson(oJson, @_cNome, @_cNomeReduz, @_cInsc, @_cCep, @_cEnd, @_cBairro, @_cEst, @_cMunc, @_cEmail, @_cTel, @_cCodCli, @_cLojaCli, @_cCgc, @__Active )
+    BreakingJson(oJson, @_cNome, @_cNomeReduz, @_cInsc, @_cCep, @_cEnd, @_cBairro, @_cEst, @_cMunc, @_cEmail, @_cTel, @_cCodCli, @_cLojaCli, @_cCgc, @__Active, @_cCodMun) )
 
     do case
         case cAction == "add"
-            aReturn := u_upIncCustomer(@_cNome, @_cNomeReduz, @_cInsc, @_cCep, @_cEnd, @_cBairro, @_cEst, @_cMunc, @_cEmail, @_cTel, @_cCodCli, @_cLojaCli, @_cCgc, @__Active, @cMsgApi, @oReturn)
+            aReturn := u_upIncCustomer(@_cNome, @_cNomeReduz, @_cInsc, @_cCep, @_cEnd, @_cBairro, @_cEst, @_cMunc, @_cEmail, @_cTel, @_cCodCli, @_cLojaCli, @_cCgc, @__Active, @cMsgApi, @oReturn, @_cCodMun)
         case cAction == "alt"
-            aReturn := u_upAltCustomer(@_cNome, @_cNomeReduz, @_cInsc, @_cCep, @_cEnd, @_cBairro, @_cEst, @_cMunc, @_cEmail, @_cTel, @_cCodCli, @_cLojaCli, @_cCgc, @__Active, @cMsgApi, @oReturn)
+            aReturn := u_upAltCustomer(@_cNome, @_cNomeReduz, @_cInsc, @_cCep, @_cEnd, @_cBairro, @_cEst, @_cMunc, @_cEmail, @_cTel, @_cCodCli, @_cLojaCli, @_cCgc, @__Active, @cMsgApi, @oReturn, @_cCodMun)
         otherwise
             cMsgApi := '{ "mensagem": "Ação inválida. Use Incluir ou Alterar." }'
             ::SetStatus( 400 )
@@ -107,7 +107,7 @@ WSMETHOD POST Cliente WSSERVICE upVendas
     endif
 return
 
-Static function BreakingJson(oJson, _cNome, _cNomeReduz, _cInsc,  _cCep, _cEnd,  _cBairro, _cEst, _cMunc, _cEmail, _cTel, _cCodCli, _cLojaCli, _cCgc, __Active )
+Static function BreakingJson(oJson, _cNome, _cNomeReduz, _cInsc,  _cCep, _cEnd,  _cBairro, _cEst, _cMunc, _cEmail, _cTel, _cCodCli, _cLojaCli, _cCgc, __Active, _cCodMun) )
 
     Local names
     Local lenJson
@@ -143,6 +143,7 @@ Static function BreakingJson(oJson, _cNome, _cNomeReduz, _cInsc,  _cCep, _cEnd, 
                 _cLojaCli     := IIF(AllTrim(Lower(names[i]))  == lower("customerCode"),       Substr(AllTrim(oJson[names[i]]),7,2),    _cLojaCli   )
                 _cCgc         := IIF(AllTrim(Lower(names[i]))  == lower("document"),           AllTrim(oJson[names[i]]),                _cCgc       )
                 __Active      := IIF(AllTrim(Lower(names[i]))  == lower("active"),             AllTrim(oJson[names[i]]),                __Active    )
+                _cCodMun      := IIF(AllTrim(Lower(names[i]))  == lower("cityCode"),           AllTrim(oJson[names[i]]),                _cCodMun    )
 
             Elseif ValType(item) == "N"
             endif

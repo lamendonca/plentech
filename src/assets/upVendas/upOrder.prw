@@ -28,7 +28,7 @@ User Function upNewOrder( _aCabec, _aItens,_aPagmt,_cMsgApi, _cAction )
     xHeadOrder(@_aNewCabec, _aCabec, _cDoc)
     xItenOrder(@_aNewItens, _aItens)
     //Implementar pagamentos
-    xPagmtOrder(@_aNewPagmt, _aPagmt)
+    xPagmtOrder(@_aNewPagmt, _aPagmt, _aNewCabec[1][2]) // passando o numero do pedido
 
     _lReturn := xExecOrder(_aNewItens, _aNewCabec, @_cMsgApi, _cAction)
 
@@ -38,7 +38,7 @@ User Function upNewOrder( _aCabec, _aItens,_aPagmt,_cMsgApi, _cAction )
 
 Return _lReturn
 Static Function xExecOrder(_aNewItens, _aNewCabec, _cMsgApi, _cAction)
-    
+
     MsExecAuto({|x, y, z| MATA410(x, y, z)}, _aNewCabec, _aNewItens, _cAction)
 
     If !lMsErroAuto
@@ -68,7 +68,7 @@ Static Function xHeadOrder(_aNewCabec, _aCabec, _cDoc)
             Aadd(_aNewCabec,{"C5_NUM",      xNumOrder(_cDoc, _aCabec[_nJ][2]),      Nil}) //NUM PEDIDO
         elseif lower(_aCabec[_nJ][1]) == lower("uuid")
             Aadd(_aNewCabec,{"C5_UUID",     _aCabec[_nJ][2],    Nil}) //UUID
-        elseif lower(_aCabec[_nJ][1]) == lower("CodigoCliente")
+        elseif lower(_aCabec[_nJ][1]) == lower("codigoCliente")
             Aadd(_aNewCabec,{"C5_CLIENTE",  substr(_aCabec[_nJ][2],1,6),    Nil}) //CLIENTE
             Aadd(_aNewCabec,{"C5_LOJA",     substr(_aCabec[_nJ][2],7,2),    Nil}) //LOJA
         elseif lower(_aCabec[_nJ][1]) == lower("vendedor")
@@ -92,12 +92,12 @@ Static Function xItenOrder(_aNewItens, _aItens)
         _aTreatItns := {}
 
         For _nG := 1 To len(_aItens[_nX]) // traduzir os campos para os campos do mata410
-            if lower(_aItens[_nX][_nG][1]) == lower("CodigoProdutouto")
+            if lower(_aItens[_nX][_nG][1]) == lower("codigoProduto")
                 aAdd( _aTreatItns, {"C6_PRODUTO", _aItens[_nX][_nG][2] , NIL} )
-            elseif lower(_aItens[_nX][_nG][1]) == lower("QtdVendida")
+            elseif lower(_aItens[_nX][_nG][1]) == lower("qtdVendida")
                 aAdd( _aTreatItns, {"C6_QUANT",   _aItens[_nX][_nG][2] , NIL} )
                 Quantidade := _aItens[_nX][_nG][2]
-            elseif lower(_aItens[_nX][_nG][1]) == lower("PrecoVenda")
+            elseif lower(_aItens[_nX][_nG][1]) == lower("precoUnitario")
                 aAdd( _aTreatItns, {"C6_VLRUNIT", _aItens[_nX][_nG][2] , NIL} )
                 Preco := _aItens[_nX][_nG][2]
             endif
@@ -110,9 +110,44 @@ Static Function xItenOrder(_aNewItens, _aItens)
 
 Return
 
-Static Function xPagmtOrder(_aNewPgto, _aPgto)
-    
-Return return_var
+Static Function xPagmtOrder(_aNewPgto, _aPgto, _nPedido)
+    // Record lines in ZZG
+    Local _nX :=  _nG   := 0
+    Local _aTreatPgto   := {}
+    Local _nValor       := 0
+    Local _cForma       := ""
+    Local _nParcelas    := ""
+    Local _dVencre      := dDataBase
+
+    For _nX := 1 to len(_aPgto)
+        _aTreatPgto := {}
+        For _nG := 1 To len(_aPgto[_nX]) // traduzir os campos para os campos do mata410
+            if lower(_aPgto[_nX][_nG][1]) == lower("valor")
+                _nValor := _aPgto[_nX][_nG][2]
+            elseif lower(_aPgto[_nX][_nG][1]) == lower("forma")
+                _cForma := _aPgto[_nX][_nG][2]
+            elseif lower(_aPgto[_nX][_nG][1]) == lower("vencimento")
+                _dVencre := ctod(_aPgto[_nX][_nG][2])
+            elseif lower(_aPgto[_nX][_nG][1]) == lower("parcelas")
+                _nParcelas := _aPgto[_nX][_nG][2]
+            endif
+        Next _nG
+
+
+        Reclock("ZZG",.T.)
+        ZZG_FILIAL := xFilial("ZZG")
+        ZZG_EMP    := cEmpAnt
+        ZZG_FILORI := cFilAnt
+        ZZG_TIPO   := _cForma
+        ZZG_PARCEL := StrZero(_nG, TamSx3("ZZG_PARCEL")[1])
+        ZZG_VENCRE := _dVencre
+        ZZG_VALOR  := _nValor
+        ZZG_PEDIDO := _nPedido
+        ZZG->(MsUNlock())
+
+    next _nX
+
+Return
 
 Static Function xNumOrder(_cDoc, __xFilial)
     _cDoc := GetSXENum("SC5","C5_NUM")

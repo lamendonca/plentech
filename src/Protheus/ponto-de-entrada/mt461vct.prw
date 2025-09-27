@@ -5,27 +5,30 @@
 */
 
 User Function MT461VCT
-Local _aVencto := ParamIxb[1]
-Local _aTitulo := ParamIxb[2]
-Local aAux     := {}
+    Local _aVencto := ParamIxb[1]
+    Local _aTitulo := ParamIxb[2]
+    Local aAux     := {}
+    Local lAuto 			:= IsInCallStack("MSEXECAUTO")
 
-dbSelectArea("ZZG")
-dbSetOrder(1)//ZZG_EMP, ZZG_FILORI, ZZG_PEDIDO, R_E_C_N_O_, D_E_L_E_T_
-If dbSeek( cEmpAnt + xFilial("SC5") + SC5->C5_NUM )
+    if !lAuto
+        dbSelectArea("ZZG")
+        dbSetOrder(1)//ZZG_EMP, ZZG_FILORI, ZZG_PEDIDO, R_E_C_N_O_, D_E_L_E_T_
+        If dbSeek( cEmpAnt + xFilial("SC5") + SC5->C5_NUM )
 
-    While ZZG->(!Eof()) .And. ZZG->ZZG_EMP  +   ZZG->ZZG_FILORI +   ZZG->ZZG_PEDIDO==;
-                              cEmpAnt       +   xFilial("SC5")  +   SC5->C5_NUM  
+            While ZZG->(!Eof()) .And. ZZG->ZZG_EMP  +   ZZG->ZZG_FILORI +   ZZG->ZZG_PEDIDO==;
+                    cEmpAnt       +   xFilial("SC5")  +   SC5->C5_NUM
 
-        aAdd(aAux,{;
+                aAdd(aAux,{;
                     ZZG->ZZG_VENCRE ,;
-                    ZZG->ZZG_VALOR  })                      
+                    ZZG->ZZG_VALOR  })
 
-        ZZG->(dbSkip())
-    End    
+                ZZG->(dbSkip())
+            End
 
-    If Len(aAux)>0
-        _aVencto := aClone(aAux)
+            If Len(aAux)>0
+                _aVencto := aClone(aAux)
+            Endif
+        Endif
     Endif
-Endif
 
-Return _aVencto 
+Return _aVencto
