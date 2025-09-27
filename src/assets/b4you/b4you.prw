@@ -71,7 +71,7 @@ User Function xTestB4U(_Method, _Order)
     Local _cFil         := "0207"   // Sucursal code - Check your filial code in SM0->M0_CODFIL
     Private lTest       := .T.      //TODO: Remove it before go to production
     Default _Method     := "Cancel"  // Default method to test
-    Default _Order      := "028071" // Default order number to test
+    Default _Order      := "027616" // Default order number to test
     If Select("SX2") == 0
         RpcSetEnv(_cEmp, _cFil,NIL, NIL, "FAT")
     EndIf
@@ -107,7 +107,7 @@ Return
 // Static Function to set credentials for REST API -- Bearer Token of Sandbox
 Static Function SetRestBearer()
     Local cBearer   := SuperGetMV("PL_REST_BEARER",   .F.,    "T0xGQToybXk2ZXFjeGlhOHQ0cGI5MWxzNWR3aG8=")
-    Local cUrl      := SuperGetMV("PL_RSTURL",        .f.,    "https://api.b4youlog.com/sandbox/v1")
+    Local cUrl      := SuperGetMV("PL_RSTURL",        .f.,    "https://sandbox-api.b4youlog.com/v1")
     Local _aHeader  := {}
     AAdd(_aHeader, 'Content-Type: application/json')
     AAdd(_aHeader, 'Authorization: Bearer ' + cBearer  )
@@ -388,7 +388,7 @@ Static Function SendB4YouLogPedidoXmlJson(_Order)
         oOrder["NumeroPedido"]      := SC5->C5_NUM // Set the order number
         oOrder["Xml"]               := _FoundXml( "XML", SC5->C5_SERIE, SC5->C5_NOTA, SC5->C5_CLIENTE, SC5->C5_LOJACLI )           // XML data of the invoice
         oOrder["EtiquetaZpl"]       := _FoundXml( "EtiquetaZpl" )
-        oOrder["NfPdf"]             := _FoundXml( "NfPdf" ) // memowrite record to a temp file and read the file to a variable
+        oOrder["NfPdf"]             := _FoundXml( "NfPdf", SC5->C5_SERIE, SC5->C5_NOTA, SC5->C5_CLIENTE, SC5->C5_LOJACLI, SF2->F2_FILIAL, SF2->F2_EMISSAO ) // memowrite record to a temp file and read the file to a variable
         // Httpquote( < cUrl >, < cMethod >, [ cGETParms ], [ cPOSTParms ], [ nTimeOut ], [ aHeadStr ], [ @cHeaderRet ] )
         FWJsonDeserialize(Httpquote(  SetRestBearer()[2]+cUrl /*url*/,;
             /* Method */'POST' ,;
@@ -419,35 +419,21 @@ Static Function SendB4YouLogPedidoXmlJson(_Order)
     RestArea(aArea) // Restore the area to the previous state
 Return lRet
 
-Static Function _FoundXml( cOption, Serie, Nota, Cliente, Loja )
+Static Function _FoundXml( cOption, Serie, Nota, Cliente, Loja, Filial, xData )
     Local cReturn       := ""
     Local xCXMLNFE      := "" //XML data of the invoice
     Do Case
         Case cOption == "XML"
             // TODO: carregar XML real (ex.: a partir da SF2/SD2, tabela própria, ou caminho em MV)
             U_PLXMLNOTA(@xCXMLNFE)
-            cReturn := xCXMLNFE // Return the XML data
+            cReturn := Encode64(xCXMLNFE) // Return the XML data
         Case cOption == "EtiquetaZpl"
             cReturn := "need-to-do"
         Case cOption == "EtiquetaPdf"
             cReturn := "need-to-do"
         Case cOption == "NfPdf"
-            cReturn := "need-to-do" //How to transform a PDF in base64?
-            if .f. //TODO: implementar
-                //Nota
-
-                _cNilNF := u_GERA_DANFE( Filial, Nota, Serie, xData ) // Generate the PDF file
-
-                ADir( _cNilNF, aFiles, aSizes)//Verifica o tamanho do arquivo, parâmetro exigido na FRead.
-
-                nHandle := fopen( _cNilNF, FO_READWRITE + FO_SHARED )
-                cString := ""
-                FRead( nHandle, cString, aSizes[1] ) //Carrega na variável cString, a string ASCII do arquivo.
-
-                _cTextNf := Encode64(cString) //Converte o arquivo para BASE64
-
-                fclose(nHandle)
-            endif
+            //Nota
+            cReturn := u_GERADANFE( Filial, Nota, Serie, xData ) // Generate the PDF file
         Otherwise
             cReturn := ""
     EndCase

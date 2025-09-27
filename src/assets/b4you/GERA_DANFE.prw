@@ -11,7 +11,15 @@
     @param xData, Date, Data da emisso
     @return url, String, Caminho da nota
 /*/
-User Function GERA_DANFE(XCFILIAL,XCNOTA,XCSERIE,XDATA, XTIPO)
+
+#INCLUDE "RPTDEF.CH"
+#INCLUDE "FWPrintSetup.ch"
+#include 'fileio.ch'
+#include 'protheus.ch'
+#include 'topconn.ch'
+
+
+User Function GERADANFE(XCFILIAL,XCNOTA,XCSERIE,XDATA, XTIPO)
 	Local aArea     := GetArea()
 	Local cIdent    := ""
 	Local cArquivo  := ""
@@ -19,6 +27,7 @@ User Function GERA_DANFE(XCFILIAL,XCNOTA,XCSERIE,XDATA, XTIPO)
 	Local lEnd      := .F.
 	Local nTamNota  := TamSX3('F2_DOC')[1]
 	Local nTamSerie := TamSX3('F2_SERIE')[1]
+	Local cReturn 	:= ""
 
 	Local _aAreaSM0 := {}
 	Local _oAppBk := oApp //Guardo a variavel resposavel por componentes visuais
@@ -108,5 +117,26 @@ User Function GERA_DANFE(XCFILIAL,XCNOTA,XCSERIE,XDATA, XTIPO)
 	oApp := _oAppBk //Backup do componente visual
 
 	RestArea(aArea)
+	cReturn := xFileBase64(cPasta +'\'+cArquivo + ".pdf")
 
-Return( cPasta +'\' cArquivo + ".pdf") //TODO: Validate
+Return( cReturn ) 
+
+Static Function xFileBase64(cArquivo)
+    Local cConteudo := ""
+    Local cString64 := ""
+    Local oFile
+ 
+    //Se o arquivo existir
+    If File(cArquivo)
+ 
+        //Tenta abrir o arquivo e pegar o conteudo
+        oFile := FwFileReader():New(cArquivo)
+        If oFile:Open()
+ 
+            //Se deu certo abrir o arquivo, pega o conteudo e transforma em base 64
+            cConteudo  := oFile:FullRead()
+            cString64  := Encode64(cConteudo, , .F., .F.)
+        EndIf
+        oFile:Close()
+    EndIf
+Return cString64
