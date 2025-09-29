@@ -6,10 +6,10 @@
 User Function MA410COR()
     Local aCoresPE  := ParamIXB
     Local aNoFields := {"ZGZ_PEDIDO","ZGZ_EMP","ZGZ_FILORI","ZGZ_DOC","ZGZ_SERIE","ZGZ_XPAYOR","ZGZ_LINKPG"}
+    Local lAuto 			:= IsInCallStack("MSEXECAUTO")
 
     Public aHeadZGZ := {}
     Public aColsZGZ := {}
-    Local lAuto 			:= IsInCallStack("MSEXECAUTO")
 
     if !lAuto // se não for msexecauto, carrega as informações
         If Empty(aHeadZGZ)

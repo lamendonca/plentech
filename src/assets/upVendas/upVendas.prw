@@ -84,7 +84,7 @@ WSMETHOD POST Cliente WSSERVICE upVendas
 
     cAction    := AllTrim(oJson:GetJsonText("action")) // Incluir ou Alterar
 
-    BreakingJson(oJson, @_cNome, @_cNomeReduz, @_cInsc, @_cCep, @_cEnd, @_cBairro, @_cEst, @_cMunc, @_cEmail, @_cTel, @_cCodCli, @_cLojaCli, @_cCgc, @__Active, @_cCodMun) )
+    BreakingJson(oJson, @_cNome, @_cNomeReduz, @_cInsc, @_cCep, @_cEnd, @_cBairro, @_cEst, @_cMunc, @_cEmail, @_cTel, @_cCodCli, @_cLojaCli, @_cCgc, @__Active, @_cCodMun) 
 
     do case
         case cAction == "add"
@@ -107,7 +107,7 @@ WSMETHOD POST Cliente WSSERVICE upVendas
     endif
 return
 
-Static function BreakingJson(oJson, _cNome, _cNomeReduz, _cInsc,  _cCep, _cEnd,  _cBairro, _cEst, _cMunc, _cEmail, _cTel, _cCodCli, _cLojaCli, _cCgc, __Active, _cCodMun) )
+Static function BreakingJson(oJson, _cNome, _cNomeReduz, _cInsc,  _cCep, _cEnd,  _cBairro, _cEst, _cMunc, _cEmail, _cTel, _cCodCli, _cLojaCli, _cCgc, __Active, _cCodMun) 
 
     Local names
     Local lenJson
