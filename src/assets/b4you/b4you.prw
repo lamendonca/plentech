@@ -69,7 +69,7 @@ User Function xTestB4U(_Method, _Order)
 
     Local _cEmp         := "01"     // Company code - Check your company code in SM0->M0_CODIGO
     Local _cFil         := "0207"   // Sucursal code - Check your filial code in SM0->M0_CODFIL
-    Default _Method     := "Cancel"  // Default method to test
+    Default _Method     := "Order"  // Default method to test
     Default _Order      := "027616" // Default order number to test
     If Select("SX2") == 0
         RpcSetEnv(_cEmp, _cFil,NIL, NIL, "FAT")

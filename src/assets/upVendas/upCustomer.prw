@@ -44,8 +44,9 @@ User Function upCustomer(cSearch)
     TcQuery cQuery New Alias (cAlias)
 
     If Empty((cAlias)->A1_COD)
-        cMsgApi := "Nenhum dado para ser consultado no código
-        u_PlenMsg(cMsgApi, "upCustomer", "Customer")
+        cMsgApi := {"Nenhum dado para ser consultado no código", .f.}
+        
+        u_PlenMsg(cMsgApi[1], "upCustomer", "Customer")
     Else
         cJson := jsonClient(cAlias)
         u_PlenMsg("Consulta do código realizada com sucesso!", "upCustomer", "Customer")
@@ -106,6 +107,7 @@ Static Function vldCustomer(Customer, Sucursal, _cMsg)
     If Empty(Customer) .OR. Empty(Sucursal)
         u_PlenMsg("Loja ou codigo do cliente em branco", "vldCustomer", "upCustomer")
         _cMsg := "Loja ou codigo do cliente em branco"
+        
         lRet := .F.
     EndIf
 
@@ -196,7 +198,6 @@ User Function upIncCustomer(_cNome, _cNomeReduz, _cInsc,  _cCep, _cEnd, _cBairro
     fConsultCli(@cCod, @_cLojaCli,_cCgc) // get the number of A1_COD and A1_LOJA
 
     oSA1Mod:= oModel:getModel("MATA030_SA1")
-    //TODO: VALIDATE MANDATORY FIELDS
     oSA1Mod:setValue("A1_COD"     ,   cCod            ) // CODIGO
     oSA1Mod:setValue("A1_LOJA"    ,   _cLojaCli       ) // LOJA
     oSA1Mod:setValue("A1_CGC"     ,   _cCgc           ) // CNPJ - CPF
@@ -215,6 +216,9 @@ User Function upIncCustomer(_cNome, _cNomeReduz, _cInsc,  _cCep, _cEnd, _cBairro
     oSA1Mod:setValue("A1_CONTRIB" ,   "2"             ) // CONTRIBUINTE // 2 = Não Contribuinte ; 1 = Contribuinte
     oSA1Mod:setValue("A1_TIPO"    ,   ""              ) // TIPO DE PESSOA // 1 = Fisica ; 2 = Juridica
     oSA1Mod:setValue("A1_COD_MUN" ,   _cCodMun        ) // CODIGO DO MUNICIPIO
+    oSA1Mod:setValue("A1_PESSOA" ,   if(len(_cCgc)=11,"F","J")        ) // 
+    oSA1Mod:setValue("A1_TIPO" ,   "F"        ) // 
+
     //Valida as informacoes
     If oModel:VldData()
 

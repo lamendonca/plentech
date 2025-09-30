@@ -63,8 +63,8 @@ User Function upProducts(_cProduto, isDetailed, PageSize, PageNumber)
     TcQuery cQuery New Alias (cAlias)
 
     If Empty((cAlias)->DESCRICAO)
-        cMsgApi := "Nenhum dado para ser consultado"
-        u_PlenMsg(cMsgApi, "upProducts", "Product")
+        cMsgApi := {"Nenhum dado para ser consultado",.f.}
+        u_PlenMsg(cMsgApi[1], "upProducts", "Product")
     Else
         totalRecords := (cTotal)->TOTALRECORDS
 

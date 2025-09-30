@@ -97,6 +97,8 @@ WSMETHOD POST Cliente WSSERVICE upVendas
             ::SetResponse(cMsgApi)
             Return
     endcase
+    
+	VarInfo("Cliente -> aReturn ", aReturn)
     if aReturn[2]
         ::SetResponse(aReturn[1])
         ::SetStatus(200)
@@ -164,6 +166,7 @@ WSMETHOD GET Customer WSSERVICE upVendas
 
     aReturn := u_upCustomer(CGC)
 
+	VarInfo("Customer -> aReturn ", aReturn)
     if aReturn[2]
         ::SetResponse(aReturn[1])
         ::SetStatus(200)
@@ -185,6 +188,8 @@ WSMETHOD GET TodosProdutos WSSERVICE upVendas
     EndIf
 
     aReturn := u_upProducts("",.F., PageSize, PageNumber)
+    
+	VarInfo("TodosProdutos -> aReturn ", aReturn)
     if aReturn[2]
         ::SetResponse(aReturn[1])
         ::SetStatus(200)
@@ -206,6 +211,7 @@ WSMETHOD GET PRODUTO WSSERVICE upVendas
 
     aReturn := u_upProducts(Product)
 
+	VarInfo("PRODUTO -> aReturn ", aReturn)
     if aReturn[2]
         ::SetResponse(aReturn[1])
         ::SetStatus(200)
@@ -222,7 +228,7 @@ WSMETHOD POST PedidoVenda WSSERVICE upVendas
     Local _aCabec       := {}
     Local _aItens       := {}
     Local _aPagmt       := {}
-    Local _cFil         := ""
+    // Local _cFil         := ""
     Local cJSON         := Self:GetContent()
     Private oJson       := JsonObject():New()
     Private _cAlias     := GetNextAlias()
