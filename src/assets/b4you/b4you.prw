@@ -78,7 +78,7 @@ User Function xTestB4U(_Method, _Order)
         CreateB4YouLogProduct( "030625" )// Test product creation
     elseif lower(_Method) == lower("Order")
         ConnectB4YouLogOrder(_Order)              // Test order creation
-    elseif lower(_Method) == lower("Cancel")  
+    elseif lower(_Method) == lower("Cancel")
         CancelB4YouLogOrder(_Order)               // Test order cancellation
     elseif lower(_Method) == lower("SendXmlJson")
         SendB4YouLogPedidoXmlJson(_Order) // Test sending XML/JSON data
@@ -149,8 +149,8 @@ Static Function ConnectB4YouLogOrder(_Order)
         oOrder["CnpjTransportadora"]        := Posicione("SA4", 1, xFilial("SA4")+SC5->C5_TRANSP, "A4_CGC")
 
         oOrder["DataFaturamento"]           := SUBSTRING(DTOS(SC5->C5_EMISSAO),1,4)+'-'+SUBSTRING(DTOS(SC5->C5_EMISSAO),5,2)+'-'+SUBSTRING(DTOS(SC5->C5_EMISSAO),7,2)
-        oOrder["TipoCanalVenda"]            := "4"                  // 1 = CORPORATIVO; 2 = ATACADO; 3 = TELEVENDAS; 4 = SITE; 5 = MARKETPLACE; 7 = LICITACAO 
-        oOrder["TipoDePedido"]              := "1"                  // 1 = CONSUMIDOR FINAL; 2 = TRANSFERENCIA FULL; 3 = TRANSFERENCIA; 4 = ATACADO; 5 = CORPORATIVO; 6 = LICITACAO; 7 = TROCA 
+        oOrder["TipoCanalVenda"]            := "4"                  // 1 = CORPORATIVO; 2 = ATACADO; 3 = TELEVENDAS; 4 = SITE; 5 = MARKETPLACE; 7 = LICITACAO
+        oOrder["TipoDePedido"]              := "1"                  // 1 = CONSUMIDOR FINAL; 2 = TRANSFERENCIA FULL; 3 = TRANSFERENCIA; 4 = ATACADO; 5 = CORPORATIVO; 6 = LICITACAO; 7 = TROCA
         oOrder["OrdemDeCompra"]             := ""
         oOrder["NumeroPedidoCLiente"]       := ""
 
@@ -225,14 +225,18 @@ Static Function ConnectB4YouLogOrder(_Order)
         if Val(SubStr(strtokarr(cHeaderGet, Chr(10))[1], 10, 3)) == 200 // Check if the HTTP status code is 200 OK
             u_PlenMsg( "Httpquote OK", "Httpquote" ) // Log success message
             // Log the order as sent to B4U
-            if  FieldPos("B5_XB4U") > 0 .and.  FieldPos("B5_XB4UJSO") > 0
+            if  FieldPos("C5_XB4U") > 0 .and.  FieldPos("C5_XB4UJSO") > 0
                 RecLock("SC5", .F.)
-                SC5->B5_XB4U     := "S"                         // Mark product as sent to B4U
-                SC5->B5_XB4UJSO  := FwNoAccent(oOrder:ToJson()) // Store JSON sent to B4U
+                SC5->C5_XB4U     := "S"                         // Mark product as sent to B4U
+                SC5->C5_XB4UJSO  := FwNoAccent(oOrder:ToJson()) // Store JSON sent to B4U
                 SC5->(MSUnlock())
             endif
             lRet    := .t.
         Else
+            RecLock("SC5", .F.)
+            SC5->C5_XB4U     := "E"                         // Mark product as sent to B4U
+            SC5->C5_XB4UJSO  := FwNoAccent(oOrder:ToJson()) // Store JSON sent to B4U
+            SC5->(MSUnlock())
             u_PlenMsg("Erro Httpquote: " + _Order + " - "+ oOrder:ToJson(), "ConnectB4YouLogOrder")
         EndIf
     else
@@ -292,6 +296,11 @@ Static Function CreateB4YouLogProduct(_Product)
             endif
             lRet    := .t.
         else
+            RecLock("SB1", .F.)
+            SB1->B1_XB4U     := "E" // Mark product as sent to B4U
+            SB1->B1_XB4UJSO  := FwNoAccent(oProduct:ToJson()) // Store JSON sent to B4U
+            SB1->(MSUnlock())
+
             u_PlenMsg("Erro Httpquote: " + _Product + " - "+ SB1->B1_DESC, "CreateB4YouLogProduct")
             lRet    := .f.
         endif
@@ -334,11 +343,16 @@ Static Function CancelB4YouLogOrder(_Order) //Not possible to cancel a order acr
             //Log the product as sent to B4U
             if  FieldPos("C5_XB4U") > 0 .and.  FieldPos("C5_XB4UJSO") > 0
                 RecLock("SC5", .F.)
-                SC5->B5_XB4U     := "C" // Mark product as sent to B4U
-                SC5->B5_XB4UJSO  := oOrder:ToJson() // Store JSON sent to B4U
+                SC5->C5_XB4U     := "C" // Mark product as sent to B4U
+                SC5->C5_XB4UJSO  := oOrder:ToJson() // Store JSON sent to B4U
+                SC5->(MSUnlock())
             endif
             lRet    := .t.
         else
+            RecLock("SC5", .F.)
+            SC5->C5_XB4U     := "X" // Mark product as sent to B4U
+            SC5->C5_XB4UJSO  := oOrder:ToJson() // Store JSON sent to B4U
+            SC5->(MSUnlock())
             u_PlenMsg("Erro Httpquote: " + _oRDER + " - "+ oOrder:toJson(), "CancelB4YouLogOrder")
             lRet    := .f.
         endif

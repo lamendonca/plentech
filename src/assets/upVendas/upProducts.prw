@@ -34,7 +34,7 @@ User Function upProducts(_cProduto, isDetailed, PageSize, PageNumber)
         cQueryTotal += " AND (B1.B1_COD LIKE '%"+Alltrim(_cProduto)+"%'          " + CRLF
         cQueryTotal += " or B1.B1_DESC LIKE '%"+Alltrim(_cProduto)+"%' )         " + CRLF
     endif
-
+    cQueryTotal := ChangeQuery(cQueryTotal)
     TcQuery cQueryTotal New Alias (cTotal)
 
     cQuery := " SELECT                                 " + CRLF
@@ -60,6 +60,7 @@ User Function upProducts(_cProduto, isDetailed, PageSize, PageNumber)
         cQuery += " OFFSET ("+cvaltochar(PageNumber)+" - 1) * "+cvaltochar(PageSize)+" ROWS "
         cQuery += " FETCH NEXT "+cvaltochar(PageSize)+" ROWS ONLY "
     endif
+    cQuery := ChangeQuery(cQuery)
     TcQuery cQuery New Alias (cAlias)
 
     If Empty((cAlias)->DESCRICAO)

@@ -40,7 +40,7 @@ User Function upCustomer(cSearch)
     cQuery += "  A1.D_E_L_E_T_ = ''                   " + CRLF
     cQuery += "  AND (A1.A1_CGC = '"+cSearch+"'          " + CRLF
     cQuery += "  OR A1.A1_NOME LIKE '%"+cSearch+"%' OR A1.A1_NREDUZ LIKE '%"+cSearch+"%' )         " + CRLF
-
+    cQuery := ChangeQuery(cQuery)
     TcQuery cQuery New Alias (cAlias)
 
     If Empty((cAlias)->A1_COD)
@@ -274,7 +274,7 @@ Static Function fConsultCli(cCod, _cLojaCli, _cCgc)
     _cQry += " A1_CGC = '"+_cCgc+"'             " + CRLF
     _cQry += " AND D_E_L_E_T_ = ''              " + CRLF
     _cQry += " ORDER BY A1_LOJA DESC            " + CRLF
-
+    _cQry := ChangeQuery(_cQry)
     TcQuery _cQry New Alias (_cAliasCli)
 
     If !Empty((_cAliasCli)->A1_COD)

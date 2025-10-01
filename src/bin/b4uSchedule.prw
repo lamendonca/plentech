@@ -46,14 +46,15 @@ Return aDados
 Static Function xQuery( Table, Rows )
     Local cQuery := ""
 
-    cQuery += "     SELECT TOP "+cValToChar(Rows)+" *  " + CRLF
+    cQuery += "     SELECT "  /*TOP "+cValToChar(Rows)+*/  // REMOVED BECAUSE THIS DATABASE IS ORACLE AND THIS NOT WORKS
+    cQuery += " *  " + CRLF
     cQuery += "         FROM "+Table+ " WHERE " + CRLF
     cQuery += "     WHERE D_E_L_E_T_!='*' AND  " + CRLF
     // Check if the table is SB1 or SC5 and adjust the query accordingly
-    if fieldpos("B1_B4USTA") > 0 .and. fieldpos("B1_XB4U") > 0 .and. fieldpos("C5_B4USTA") > 0 .and. fieldpos("C5_XB4UJSO") > 0
-        cQuery += "     "+Iif(Substr(Table,1,1)='S', Substr(Table,2,2) , Table )+"_XB4U in (' ','1')  " + CRLF
-    endif
-Return cQuery
+    // if fieldpos("B1_B4USTA") > 0 .and. fieldpos("B1_XB4U") > 0 .and. fieldpos("C5_B4USTA") > 0 .and. fieldpos("C5_XB4UJSO") > 0
+    cQuery += "     "+Iif(Substr(Table,1,1)='S', Substr(Table,2,2) , Table )+"_XB4U in (' ','1')  " + CRLF
+    // endif
+Return ChangeQuery(cQuery)
 
 Static Function u_PlenMsg(msg, lVarInfo, variavel)
     Default lVarInfo := .F.
