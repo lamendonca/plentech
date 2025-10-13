@@ -19,6 +19,7 @@ User Function MA410DEL
             End
         Endif
     Endif
-
+    
+    U_integB4U( "Cancel", SC5->(C5_FILIAL+C5_NUM) )
 
 Return
