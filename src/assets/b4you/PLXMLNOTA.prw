@@ -13,7 +13,7 @@ User Function PLXMLNOTA(xCXMLNFE)
 	Local aAreaPP    := GetArea()
 	Local cIdEnt     := ""
 	Local cProtocolo := ""
-	Local cCodRet	 := ""
+	// Local cCodRet	 := ""
 	Local nX         := 0
 	Local aNota      := {}
 	Local cModalidade:= ""
@@ -49,7 +49,7 @@ User Function PLXMLNOTA(xCXMLNFE)
 				// 		// SF2->F2_CHVNFE := SubStr(NfeIdSPED(aXML[nX][2],"Id"),4)
 				// 		// SF2->(MsUnlock())
 				// 		// Xml da NF para integrar com a plataforma Set Canhoto
-				// 		xCXMLNFE := aXML[nX][2]
+						xCXMLNFE := aXML[nX][2]
 				// 	EndIf
 				// 	If cCodRet $ RetCodDene() // Uso Denegado
 				// 		// RecLock("SF2", .F.) 

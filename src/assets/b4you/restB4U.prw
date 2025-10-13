@@ -35,7 +35,6 @@ WSMETHOD POST WEBHOOK WSSERVICE restB4U
     Local cJSON     := Self:GetContent()
     Private oJson   := JsonObject():New()
     Private _cAlias := GetNextAlias()
-    Private _cFil   := "0207" // Default branch 1 if CNPJ is empty
     Self:SetContentType("application/json")
 
     ret := oJson:FromJson(cJSON)
@@ -55,9 +54,9 @@ WSMETHOD POST WEBHOOK WSSERVICE restB4U
     // }
     _Order   := AllTrim(oJson:GetJsonText(Upper("Id")))
     _Status  := AllTrim(oJson:GetJsonText(Upper("Evento")))
+    u_PlenMsg("Recebido o pedido: " + _Order + " com status: " + _Status, "restB4U", "B4U")
 
-
-    If updateSC5(_cFil, _Order, _Status, @Message )
+    If updateSC5(_Order, _Status, @Message )
         u_PlenMsg(Message, "restB4U", "B4U")
         ::SetResponse(Message)
         ::SetStatus( 200 )
@@ -68,33 +67,32 @@ WSMETHOD POST WEBHOOK WSSERVICE restB4U
     EndIf
 Return
 
-Static Function updateSC5( Sucursal, Order, Status, Message  )
+Static Function updateSC5( Order, Status, Message  )
     Local lRet      := .F.
     DBSelectArea("SC5")
     SC5->(DbSetOrder(1))
-    SC5->(DBSeek(Sucursal + Order )) // Filial + Pedido
+    SC5->(DbGoTop())
+    SC5->(DBSeek( Order )) // Filial + Pedido
 
     if SC5->(Found())
         lRet := .T.
-        u_PlenMsg("Pedido encontrado: " + Sucursal + Order, "restB4U", "B4U")
-        if fieldPos("C5_B4USTA") > 0 .and. fieldPos("C5_XB4UJSO") > 0 // Check if the fields exist
-            if !(SB1->C5_B4USTA == "S")
-                RecLock("SC5",.F. )
-                u_PlenMsg("Atualizando status do pedido: " + Order + " para " + Status, "restB4U", "B4U")
-                SC5->C5_B4USTA := Status
-                SC5->C5_XB4UJSO :=  StatusRet(Status)
-                Message  := '{ "mensagem": "Status do pedido atualizado com sucesso!" }'
-                u_PlenMsg(Message, "restB4U", "B4U")
-                SC5->(MSUnlock())
-            Else
-                Message  := '{ "mensagem": "Status do pedido não pode ser atualizado!" }'
-                u_PlenMsg(Message, "restB4U", "B4U")
-                ::SetResponse(Message)
-                ::SetStatus( 400 )
-            endif
-        endif
+        u_PlenMsg("Pedido encontrado: " + Order, "restB4U", "B4U")
+        // if !(SC5->C5_XB4U == "S") //TODO: REMOVE
+            RecLock("SC5",.F. )
+            u_PlenMsg("Atualizando status do pedido: " + Order + " para " + Status, "restB4U", "B4U")
+            SC5->C5_XB4USTA := Status 
+            SC5->C5_XB4UJSO :=  StatusRet(Status)
+            Message  := '{ "mensagem": "Status do pedido atualizado com sucesso!" }'
+            u_PlenMsg(Message, "restB4U", "B4U")
+            SC5->(MSUnlock())
+        // Else //TODO: REMOVE
+        //     Message  := '{ "mensagem": "Status do pedido não pode ser atualizado!" }'
+        //     u_PlenMsg(Message, "restB4U", "B4U")
+        //     ::SetResponse(Message)
+        //     ::SetStatus( 400 )
+        // endif
     Else
-        Message  := '{ "mensagem": "Pedido não encontrado!" }'
+        Message  := '{ "mensagem": "Pedido '+Order+' não encontrado!" }'
         u_PlenMsg(Message, "restB4U", "B4U")
         lRet := .F.
     endif

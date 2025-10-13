@@ -31,7 +31,7 @@ User Function GERADANFE(XCFILIAL,XCNOTA,XCSERIE,XDATA, XTIPO)
 
 	Local _aAreaSM0 := {}
 	Local _oAppBk := oApp //Guardo a variavel resposavel por componentes visuais
-	Local cPasta  := SuperGetMv("PL_B4UFLD",.f.,"\b4u\invoices\")
+	Local cPasta  := SuperGetMv("PL_B4UFLD",.f.,"\b4u\invoices")
 
 	Private PixelX
 	Private PixelY
