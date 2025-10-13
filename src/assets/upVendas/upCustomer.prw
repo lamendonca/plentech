@@ -29,6 +29,7 @@ User Function upCustomer(cSearch)
     cQuery += " A1_MUN,                               " + CRLF
     cQuery += " A1_BAIRRO,                            " + CRLF
     cQuery += " A1_CEP,                               " + CRLF
+    cQuery += " A1_CNAE,                                " + CRLF
     cQuery += " A1_EST,                                " + CRLF
     cQuery += " A1_INSCR,                             " + CRLF
     cQuery += " A1_EMAIL,                             " + CRLF
@@ -41,6 +42,7 @@ User Function upCustomer(cSearch)
     cQuery += "  AND (A1.A1_CGC = '"+cSearch+"'          " + CRLF
     cQuery += "  OR A1.A1_NOME LIKE '%"+cSearch+"%' OR A1.A1_NREDUZ LIKE '%"+cSearch+"%' )         " + CRLF
     cQuery := ChangeQuery(cQuery)
+    varInfo("Consulta de clientes -> cQuery",   cQuery)
     TcQuery cQuery New Alias (cAlias)
 
     If Empty((cAlias)->A1_COD)
@@ -76,6 +78,7 @@ Static Function jsonClient(cAlias)
         oCustomer["stateRegistration"]  := Alltrim((cAlias)->A1_INSCR)
         oCustomer["mail"]               := Alltrim((cAlias)->A1_EMAIL)
         oCustomer["mobile"]             := Alltrim((cAlias)->A1_TEL)
+        oCustomer["cnae"]               := Alltrim((cAlias)->A1_CNAE)
         aAdd(aCustomer, oCustomer)
         (cAlias)->(DbSkip())
         lRet := .t.
@@ -85,13 +88,13 @@ Static Function jsonClient(cAlias)
 Return {oCustomers:toJson(),lRet}
 
 
-User function upAltCustomer(_cNome, _cNomeReduz,_cInsc,  _cCep, _cEnd, _cBairro, _cEst, _cMunc, _cEmail, _cTel, _cCodCli, _cLojaCli, cCGC, active, _cCodMun)
+User function upAltCustomer(_cNome, _cNomeReduz,_cInsc,  _cCep, _cEnd, _cBairro, _cEst, _cMunc, _cEmail, _cTel, _cCodCli, _cLojaCli, cCGC, active, oReturn, _cCodMun, _cCNAE)
     Local aReturn := {}
 
     aReturn := vldCustomer(_cCodCli, _cLojaCli ) // validate if the client exists
     If aReturn[2] // if true, client exists and can be altered
 
-        aReturn := fRecordCli(  _cNome, _cNomeReduz,_cInsc,  _cCep, _cEnd, _cBairro, _cEst, _cMunc, _cEmail, _cTel, _cCodCli, _cLojaCli, cCGC, active, _cCodMun)
+        aReturn := fRecordCli(  _cNome, _cNomeReduz,_cInsc,  _cCep, _cEnd, _cBairro, _cEst, _cMunc, _cEmail, _cTel, _cCodCli, _cLojaCli, cCGC, active, _cCodMun, _cCNAE)
 
     EndIf
 
@@ -119,10 +122,10 @@ Static Function vldCustomer(Customer, Sucursal, _cMsg)
     oReturn["Processo"] := _cMsg
 Return {oReturn:toJson(), lRet}
 
-Static Function fRecordCli(  __cNome, _cNomeReduz,_cInsc,  _cCep, _cEnd, _cBairro, _cEst, _cMunc, _cEmail, _cTel, _cCodCli, _cLojaCli, cCGC, active, _cCodMun)
+Static Function fRecordCli(  __cNome, _cNomeReduz,_cInsc,  _cCep, _cEnd, _cBairro, _cEst, _cMunc, _cEmail, _cTel, _cCodCli, _cLojaCli, cCGC, active, oReturn,_cCodMun, _cCNAE)
 
     Local lOk     := .F.
-    Local oReturn       := JsonObject():New()
+    // Local oReturn       := JsonObject():New()
     Public _cNomeCli    := __cNome
 
 
@@ -144,9 +147,14 @@ Static Function fRecordCli(  __cNome, _cNomeReduz,_cInsc,  _cCep, _cEnd, _cBairr
     oSA1Mod:setValue("A1_TEL"     ,   _cTel          )
     oSA1Mod:setValue("A1_CGC"     ,   cCGC           )
     oSA1Mod:setValue("A1_MSBLQL"  ,   active         )
-    oSA1Mod:setValue("A1_TIPO"    ,   ""              ) // TIPO DE PESSOA // 1 = Fisica ; 2 = Juridica
-    oSA1Mod:setValue("A1_COD_MUN" ,   _cCodMun        ) // CODIGO DO MUNICIPIO
-
+    
+    // oSA1Mod:setValue("A1_TIPO"    ,   "F"             ) // TIPO DE PESSOA // 1 = Fisica ; 2 = Juridica
+    oSA1Mod:setValue("A1_COD_MUN" ,   _cCodMun        ) // VALIDATE CODIGO DO MUNICIPIO
+    //new fields in SA1 
+    oSA1Mod:setValue("A1_CNAE"  ,     _cCNAE         ) // CNAE
+    // oSA1Mod:setValue("A1_CODPAIS" ,   '01058'        )
+    oSA1Mod:setValue("A1_IBGE" ,   _cCodMun        )
+    
     If oModel:VldData()
 
         If oModel:CommitData()
@@ -183,11 +191,11 @@ Static Function fRecordCli(  __cNome, _cNomeReduz,_cInsc,  _cCep, _cEnd, _cBairr
 Return {oReturn:toJson(), lOk}
 
 
-User Function upIncCustomer(_cNome, _cNomeReduz, _cInsc,  _cCep, _cEnd, _cBairro,_cEst, _cMunc, _cEmail, _cTel, _cCodCli, _cLojaCli, _cCgc, _cCodMun)
+User Function upIncCustomer(_cNome, _cNomeReduz, _cInsc,  _cCep, _cEnd, _cBairro,_cEst, _cMunc, _cEmail, _cTel, _cCodCli, _cLojaCli, _cCgc, __Active, cMsgApi, oReturn, _cCodMun, _cCNAE)
 
     Local lOk           := .F.
     Local cCod          := ""
-    Local oReturn       := JsonObject():New()
+    // Local oReturn       := JsonObject():New()
     Public _cNomeCli    := _cNome
 
 
@@ -200,25 +208,30 @@ User Function upIncCustomer(_cNome, _cNomeReduz, _cInsc,  _cCep, _cEnd, _cBairro
     oSA1Mod:= oModel:getModel("MATA030_SA1")
     oSA1Mod:setValue("A1_COD"     ,   cCod            ) // CODIGO
     oSA1Mod:setValue("A1_LOJA"    ,   _cLojaCli       ) // LOJA
-    oSA1Mod:setValue("A1_CGC"     ,   _cCgc           ) // CNPJ - CPF
-    oSA1Mod:setValue("A1_NREDUZ"  ,   _cNomeReduz     ) // NOME FANTASIA
-    oSA1Mod:setValue("A1_END"     ,   _cEnd           ) // ENDERECO
     oSA1Mod:setValue("A1_NOME"    ,   _cNomeCli       ) // NOME
-    oSA1Mod:setValue("A1_BAIRRO"  ,   _cBairro        ) // BAIRRO
+    oSA1Mod:setValue("A1_NREDUZ"  ,   _cNomeReduz     ) // NOME FANTASIA
     oSA1Mod:setValue("A1_INSCR"   ,   _cInsc          ) // INSCRICAO ESTADUAL
+    oSA1Mod:setValue("A1_CEP"     ,   _cCep           ) // CEP
+    oSA1Mod:setValue("A1_END"     ,   _cEnd           ) // ENDERECO
+    oSA1Mod:setValue("A1_BAIRRO"  ,   _cBairro        ) // BAIRRO
     oSA1Mod:setValue("A1_EST"     ,   _cEst           ) // ESTADO
     oSA1Mod:setValue("A1_MUN"     ,   _cMunc          ) // MUNICIPIO
-    oSA1Mod:setValue("A1_CEP"     ,   _cCep           ) // CEP
     oSA1Mod:setValue("A1_PAIS"    ,   "105"           ) // PAIS - DEFAULT 105
     oSA1Mod:setValue("A1_EMAIL"   ,   _cEmail         ) // EMAIL
     oSA1Mod:setValue("A1_TEL"     ,   _cTel           ) // TELEFONE
+    oSA1Mod:setValue("A1_CGC"     ,   _cCgc           ) // CNPJ - CPF
     oSA1Mod:setValue("A1_CODPAIS" ,   "01058"         ) // CODIGO DO PAIS - DEFAULT  01058
     oSA1Mod:setValue("A1_CONTRIB" ,   "2"             ) // CONTRIBUINTE // 2 = Não Contribuinte ; 1 = Contribuinte
-    oSA1Mod:setValue("A1_TIPO"    ,   ""              ) // TIPO DE PESSOA // 1 = Fisica ; 2 = Juridica
+    oSA1Mod:setValue("A1_TIPO"    ,   "F"              ) // TIPO DE PESSOA // 1 = Fisica ; 2 = Juridica
     oSA1Mod:setValue("A1_COD_MUN" ,   _cCodMun        ) // CODIGO DO MUNICIPIO
     oSA1Mod:setValue("A1_PESSOA" ,   if(len(_cCgc)=11,"F","J")        ) // 
     oSA1Mod:setValue("A1_TIPO" ,   "F"        ) // 
-
+    
+    //new fields in SA1 
+    oSA1Mod:setValue("A1_CNAE"  ,     _cCNAE         ) // CNAE
+    oSA1Mod:setValue("A1_CODPAIS" ,   '01058'        )
+    oSA1Mod:setValue("A1_IBGE" ,   _cCodMun        )
+    
     //Valida as informacoes
     If oModel:VldData()
 
@@ -265,7 +278,7 @@ Static Function fConsultCli(cCod, _cLojaCli, _cCgc)
     Local _cQry         := ""
 
     _cQry := " SELECT                           " + CRLF
-    _cQry += " TOP 1                            " + CRLF
+    // _cQry += " TOP 1                            " + CRLF
     _cQry += " A1_CGC,                          " + CRLF
     _cQry += " A1_COD,                          " + CRLF
     _cQry += " A1_LOJA                          " + CRLF
@@ -274,6 +287,7 @@ Static Function fConsultCli(cCod, _cLojaCli, _cCgc)
     _cQry += " A1_CGC = '"+_cCgc+"'             " + CRLF
     _cQry += " AND D_E_L_E_T_ = ''              " + CRLF
     _cQry += " ORDER BY A1_LOJA DESC            " + CRLF
+    // _cQry += " FETCH FIRST 1 ROW ONLY           " 
     _cQry := ChangeQuery(_cQry)
     TcQuery _cQry New Alias (_cAliasCli)
 
@@ -283,8 +297,8 @@ Static Function fConsultCli(cCod, _cLojaCli, _cCgc)
         (_cAliasCli)->(DbCloseArea())
         Return(.T.)
     else
-        _cLojaCli   := strzero("01",TamSX3("A1_LOJA")[1]) // Fully with zeros before the 1 until the size of the field
-        cCod        := SubStr(_cCGC,1,8) // return 8 first digits of CNPJ/CPF
+        _cLojaCli   := strzero(1,TamSX3("A1_LOJA")[1])      // Fully with zeros before the 1 until the size of the field
+        cCod        := SubStr(_cCGC,1,TamSX3("A1_COD")[1])  // return first digits of CNPJ/CPF
     EndIf
 
 Return(.F.)
