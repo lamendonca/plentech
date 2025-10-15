@@ -12,6 +12,11 @@
 // upProducts.prw - File auxiliar to get products from Protheus
 
 // Surely your goodness and faithfulness will pursue me all my days - Psalm 23:6
+
+// I needed to remove the SBM cause they dont use Grupo in the products
+// So I will leave the join commented if in the future they want to use it again
+// check the #SBM to configure the groups
+
 User Function upProducts(_cProduto, isDetailed, PageSize, PageNumber)
 
     Local cQuery := ""
@@ -27,7 +32,7 @@ User Function upProducts(_cProduto, isDetailed, PageSize, PageNumber)
     cQueryTotal += " COUNT(*) AS TOTALRECORDS               " + CRLF
     cQueryTotal += " FROM                                   " + CRLF
     cQueryTotal += " 	" + RetSQLName("SB1") + " B1       " + CRLF
-    cQueryTotal += " 	INNER JOIN " + RetSQLName("SBM") + " BM ON BM.D_E_L_E_T_!='*' AND BM_GRUPO = B1_GRUPO " + CRLF
+    // cQueryTotal += " 	INNER JOIN " + RetSQLName("SBM") + " BM ON BM.D_E_L_E_T_!='*' AND BM_GRUPO = B1_GRUPO " + CRLF //#SBM
     cQueryTotal += " WHERE                                  " + CRLF
     cQueryTotal += "  B1.D_E_L_E_T_ = ''                    " + CRLF
     if isDetailed
@@ -35,20 +40,21 @@ User Function upProducts(_cProduto, isDetailed, PageSize, PageNumber)
         cQueryTotal += " or B1.B1_DESC LIKE '%"+Alltrim(_cProduto)+"%' )         " + CRLF
     endif
     cQueryTotal := ChangeQuery(cQueryTotal)
+    VarInfo("Consulta de todos os produtos -> cQueryTotal",   cQueryTotal)
     TcQuery cQueryTotal New Alias (cTotal)
 
     cQuery := " SELECT                                 " + CRLF
     cQuery += " B1_COD CODIGO,                         " + CRLF
     cQuery += " B1_DESC DESCRICAO,                     " + CRLF
     cQuery += " B1_UM UNIDADEMEDIDA,                   " + CRLF
-    cQuery += " BM_DESC GRUPO,                         " + CRLF
+    // cQuery += " BM_DESC GRUPO,                         " + CRLF //#SBM
     cQuery += " B1_PESO PESO,                          " + CRLF
     cQuery += " 1 VOLUME,                              " + CRLF
     cQuery += " B1_CODBAR CODIGODEBARRAS,              " + CRLF
     cQuery += " B1_PRV1 PRECO                          " + CRLF
     cQuery += " FROM                                   " + CRLF
     cQuery += " 	" + RetSQLName("SB1") + " B1       " + CRLF
-    cQuery += " 	INNER JOIN " + RetSQLName("SBM") + " BM ON BM.D_E_L_E_T_!='*' AND BM_GRUPO = B1_GRUPO " + CRLF
+    // cQuery += " 	INNER JOIN " + RetSQLName("SBM") + " BM ON BM.D_E_L_E_T_!='*' AND BM_GRUPO = B1_GRUPO " + CRLF //#SBM
     cQuery += " WHERE                                  " + CRLF
     cQuery += "  B1.D_E_L_E_T_ = ''                    " + CRLF
     if isDetailed
@@ -61,6 +67,7 @@ User Function upProducts(_cProduto, isDetailed, PageSize, PageNumber)
         cQuery += " FETCH NEXT "+cvaltochar(PageSize)+" ROWS ONLY "
     endif
     cQuery := ChangeQuery(cQuery)
+    VarInfo("Consulta de produtos -> cQuery",   cQuery)
     TcQuery cQuery New Alias (cAlias)
 
     If Empty((cAlias)->DESCRICAO)
@@ -92,7 +99,7 @@ Static Function jsonProduto(cAlias, isDetailed, pageSize, pageNumber, totalRecor
         oProduct["productCode"]        := Alltrim((cAlias)->CODIGO)
         oProduct["productDescription"]        := Alltrim((cAlias)->DESCRICAO)
         oProduct["unit"]                 := (cAlias)->UNIDADEMEDIDA
-        oProduct["productGroup"]          := Alltrim((cAlias)->GRUPO)
+        // oProduct["productGroup"]          := Alltrim((cAlias)->GRUPO)
         oProduct["barcode"]          := Alltrim((cAlias)->CODIGODEBARRAS)
         if isDetailed
             oProduct["price"]                   := xGetPrice((cAlias)->CODIGO,(cAlias)->PRECO)

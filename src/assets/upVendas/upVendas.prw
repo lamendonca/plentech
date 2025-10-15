@@ -66,6 +66,7 @@ WSMETHOD POST Cliente WSSERVICE upVendas
     Local _cCgc         := ""
     Local __Active      := "2" //1=Inativo;2=Ativo                                                                                                               
     Local _cCodMun      := "" // Codigo do Municipio
+    Local _cCNAE        := "" // Codigo do CNAE
 
     Local cJSON          := Self:GetContent()
     Private oJson        := JsonObject():New()
@@ -84,15 +85,15 @@ WSMETHOD POST Cliente WSSERVICE upVendas
 
     cAction    := AllTrim(oJson:GetJsonText("action")) // Incluir ou Alterar
 
-    BreakingJson(oJson, @_cNome, @_cNomeReduz, @_cInsc, @_cCep, @_cEnd, @_cBairro, @_cEst, @_cMunc, @_cEmail, @_cTel, @_cCodCli, @_cLojaCli, @_cCgc, @__Active, @_cCodMun) 
-
+    BreakingJson(oJson, @_cNome, @_cNomeReduz, @_cInsc, @_cCep, @_cEnd, @_cBairro, @_cEst, @_cMunc, @_cEmail, @_cTel, @_cCodCli, @_cLojaCli, @_cCgc, @__Active, @_cCodMun, @_cCNAE) 
+    VarInfo("Cliente -> JSON ", oJson)
     do case
         case cAction == "add"
-            aReturn := u_upIncCustomer(@_cNome, @_cNomeReduz, @_cInsc, @_cCep, @_cEnd, @_cBairro, @_cEst, @_cMunc, @_cEmail, @_cTel, @_cCodCli, @_cLojaCli, @_cCgc, @__Active, @cMsgApi, @oReturn, @_cCodMun)
+            aReturn := u_upIncCustomer(@_cNome, @_cNomeReduz, @_cInsc, @_cCep, @_cEnd, @_cBairro, @_cEst, @_cMunc, @_cEmail, @_cTel, @_cCodCli, @_cLojaCli, @_cCgc, @__Active, @cMsgApi, @oReturn, @_cCodMun, @_cCNAE)
         case cAction == "alt"
-            aReturn := u_upAltCustomer(@_cNome, @_cNomeReduz, @_cInsc, @_cCep, @_cEnd, @_cBairro, @_cEst, @_cMunc, @_cEmail, @_cTel, @_cCodCli, @_cLojaCli, @_cCgc, @__Active, @cMsgApi, @oReturn, @_cCodMun)
+            aReturn := u_upAltCustomer(@_cNome, @_cNomeReduz, @_cInsc, @_cCep, @_cEnd, @_cBairro, @_cEst, @_cMunc, @_cEmail, @_cTel, @_cCodCli, @_cLojaCli, @_cCgc, @__Active, @cMsgApi, @oReturn, @_cCodMun, @_cCNAE)
         otherwise
-            cMsgApi := '{ "mensagem": "Ação inválida. Use Incluir ou Alterar." }'
+            cMsgApi := '{ "mensagem": "Ação inválida. Use Add - Incluir ou Alt - Alterar." }'
             ::SetStatus( 400 )
             ::SetResponse(cMsgApi)
             Return
@@ -109,7 +110,7 @@ WSMETHOD POST Cliente WSSERVICE upVendas
     endif
 return
 
-Static function BreakingJson(oJson, _cNome, _cNomeReduz, _cInsc,  _cCep, _cEnd,  _cBairro, _cEst, _cMunc, _cEmail, _cTel, _cCodCli, _cLojaCli, _cCgc, __Active, _cCodMun) 
+Static function BreakingJson(oJson, _cNome, _cNomeReduz, _cInsc,  _cCep, _cEnd,  _cBairro, _cEst, _cMunc, _cEmail, _cTel, _cCodCli, _cLojaCli, _cCgc, __Active, _cCodMun, _cCNAE) 
 
     Local names
     Local lenJson
@@ -130,7 +131,7 @@ Static function BreakingJson(oJson, _cNome, _cNomeReduz, _cInsc,  _cCep, _cEnd, 
 
             If ValType(item) == "C"
                 Aadd(aJson,{names[i], cvaltochar(oJson[names[i]])})
-
+                varInfo("Cliente -> names[i] ", names[i])
                 _cNome        := IIF(AllTrim(Lower(names[i]))  == lower("customerName"),       AllTrim(oJson[names[i]]),                _cNome      )
                 _cNomeReduz   := IIF(AllTrim(Lower(names[i]))  == lower("tradeName"),          AllTrim(oJson[names[i]]),                _cNomeReduz )
                 _cInsc        := IIF(AllTrim(Lower(names[i]))  == lower("stateRegistration"),  AllTrim(oJson[names[i]]),                _cInsc      )
@@ -146,6 +147,7 @@ Static function BreakingJson(oJson, _cNome, _cNomeReduz, _cInsc,  _cCep, _cEnd, 
                 _cCgc         := IIF(AllTrim(Lower(names[i]))  == lower("document"),           AllTrim(oJson[names[i]]),                _cCgc       )
                 __Active      := IIF(AllTrim(Lower(names[i]))  == lower("active"),             AllTrim(oJson[names[i]]),                __Active    )
                 _cCodMun      := IIF(AllTrim(Lower(names[i]))  == lower("cityCode"),           AllTrim(oJson[names[i]]),                _cCodMun    )
+                _cCNAE        := IIF(AllTrim(Lower(names[i]))  == lower("cnae"),               AllTrim(oJson[names[i]]),                _cCNAE      )
 
             Elseif ValType(item) == "N"
             endif
@@ -229,6 +231,7 @@ WSMETHOD POST PedidoVenda WSSERVICE upVendas
     Local _aItens       := {}
     Local _aPagmt       := {}
     // Local _cFil         := ""
+    Local oReturn       := JsonObject():New()
     Local cJSON         := Self:GetContent()
     Private oJson       := JsonObject():New()
     Private _cAlias     := GetNextAlias()

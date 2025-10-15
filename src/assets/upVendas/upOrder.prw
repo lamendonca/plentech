@@ -18,6 +18,7 @@ User Function upNewOrder( _aCabec, _aItens,_aPagmt,_cMsgApi, _cAction )
     Local _aNewPagmt    := {}
     Local _cDoc         := ""
     Local _lReturn		:= .F.
+    Local oJson        := JsonObject():New()
     PRIVATE lMsErroAuto := .F.
 
 
@@ -28,10 +29,17 @@ User Function upNewOrder( _aCabec, _aItens,_aPagmt,_cMsgApi, _cAction )
     xHeadOrder(@_aNewCabec, _aCabec, _cDoc)
     xItenOrder(@_aNewItens, _aItens)
     //Implementar pagamentos
-    xPagmtOrder(@_aNewPagmt, _aPagmt, _aNewCabec[1][2]) // passando o numero do pedido
 
     _lReturn := xExecOrder(_aNewItens, _aNewCabec, @_cMsgApi, _cAction)
-
+    oJson:FromJson(_cMsgApi)
+    varinfo("Retorno da execucao do pedido -> oJson", oJson)
+    if _lReturn .and. !Empty(oJson['numero'])
+        xPagmtOrder(@_aNewPagmt, _aPagmt, oJson['numero']) // passando o numero do pedido
+        // _lReturn := .T.>
+    else
+        _lReturn := .F.
+        u_PlenMsg("Erro na criacao do pedido", "upNewOrder", "upVendas")
+    endif
     SC5->(DbCloseArea())
 
     RestArea(_aArea)
@@ -51,6 +59,7 @@ Static Function xExecOrder(_aNewItens, _aNewCabec, _cMsgApi, _cAction)
         Return(.T.)
     Else
         _cMsgApi := MostraErro("P:\Totvs\Protheus12\Data\Protheus_Data_Ofc\erros", "error.log")
+        Varinfo("Erro na execusao do ExecAuto MATA410", _cMsgApi)
         Return(.F.)
     EndIf
 
@@ -59,12 +68,13 @@ Static Function xHeadOrder(_aNewCabec, _aCabec, _cDoc)
 
     Local _nJ := 0
     Aadd(_aNewCabec,{"C5_TIPO",     "N",        Nil}) //TIPO
-    Aadd(_aNewCabec,{"C5_CONDPAG",  "999",      Nil}) //CONDICAO DE PAGAMENTO -- CONDICAO DO TIPO A
+    // Aadd(_aNewCabec,{"C5_CONDPAG",  "330",      Nil}) //CONDICAO DE PAGAMENTO -- CONDICAO DO TIPO A
     Aadd(_aNewCabec,{"C5_EMISSAO",  dDataBase,  Nil}) //DATA DE EMISSAO
-
+    varinfo("Dados do cabeçalho -> _aCabec", _aCabec)
     For _nJ := 1 To Len(_aCabec)
         if lower(_aCabec[_nJ][1]) == lower("filial")
             Aadd(_aNewCabec,{"C5_FILIAL",   _aCabec[_nJ][2],    Nil}) //FILIAL
+            cFilAnt := _aCabec[_nJ][2]
             Aadd(_aNewCabec,{"C5_NUM",      xNumOrder(_cDoc, _aCabec[_nJ][2]),      Nil}) //NUM PEDIDO
         elseif lower(_aCabec[_nJ][1]) == lower("uuid")
             Aadd(_aNewCabec,{"C5_UUID",     _aCabec[_nJ][2],    Nil}) //UUID
@@ -75,8 +85,14 @@ Static Function xHeadOrder(_aNewCabec, _aCabec, _cDoc)
             Aadd(_aNewCabec,{"C5_VEND1",   _aCabec[_nJ][2],    Nil}) //VENDEDOR
         ElseIf lower(_aCabec[_nJ][1]) == lower("tipoCliente")
             aAdd(_aNewCabec,{"C5_TIPOCLI",  _aCabec[_nJ][2],       Nil}) //tipo cliente
+        ElseIf lower(_aCabec[_nJ][1]) == lower("pagamento")
+            aAdd(_aNewCabec,{"C5_CONDPAG",  _aCabec[_nJ][2],       Nil}) //tipo cliente
+        ElseIf lower(_aCabec[_nJ][1]) == lower("frete")
+            aAdd(_aNewCabec,{"C5_TPFRETE",  _aCabec[_nJ][2],       Nil}) //tipo cliente
         endif
     next nX
+    // Fields Default
+    aAdd(_aNewCabec,{"C5_NATUREZ",  '0101',       Nil}) //tipo cliente
 
 
 Return
@@ -90,19 +106,23 @@ Static Function xItenOrder(_aNewItens, _aItens)
     For _nX := 1 To Len(_aItens)
 
         _aTreatItns := {}
-
+        varinfo("Dados dos produtos -> _aItens", _aItens)
         For _nG := 1 To len(_aItens[_nX]) // traduzir os campos para os campos do mata410
             if lower(_aItens[_nX][_nG][1]) == lower("codigoProduto")
                 aAdd( _aTreatItns, {"C6_PRODUTO", _aItens[_nX][_nG][2] , NIL} )
             elseif lower(_aItens[_nX][_nG][1]) == lower("qtdVendida")
                 aAdd( _aTreatItns, {"C6_QUANT",   _aItens[_nX][_nG][2] , NIL} )
+                aAdd( _aTreatItns, {"C6_QTDVEN",   _aItens[_nX][_nG][2] , NIL} )
                 Quantidade := _aItens[_nX][_nG][2]
             elseif lower(_aItens[_nX][_nG][1]) == lower("precoUnitario")
                 aAdd( _aTreatItns, {"C6_VLRUNIT", _aItens[_nX][_nG][2] , NIL} )
+                aAdd( _aTreatItns, {"C6_PRCVEN", _aItens[_nX][_nG][2] , NIL} )
+                aAdd( _aTreatItns, {"C6_PRUNIT", _aItens[_nX][_nG][2] , NIL} )
                 Preco := _aItens[_nX][_nG][2]
             endif
         Next _nG
         aAdd( _aTreatItns, {"C6_VALOR",   Quantidade * Preco , NIL} )
+        aAdd( _aTreatItns, {"C6_TES",   '501', NIL} )
 
         aadd(_aNewItens,_aTreatItns)
 
@@ -133,7 +153,8 @@ Static Function xPagmtOrder(_aNewPgto, _aPgto, _nPedido)
             endif
         Next _nG
 
-
+        varInfo("Dados de Pagamento -> _aPgto",   _aPgto[_nX])
+        DBSelectArea("ZZG")
         Reclock("ZZG",.T.)
         ZZG_FILIAL := xFilial("ZZG")
         ZZG_EMP    := cEmpAnt
