@@ -415,7 +415,7 @@ Static Function SendB4YouLogPedidoXmlJson(_Order)
             else
                 RecLock("SC5", .F.)
                 SC5->C5_XB4U     := "F" // Mark product as sent to B4U
-                SC5->C5_XB4UJSO  := oOrder:ToJson() // Store JSON sent to B4U
+                SC5->C5_XB4UJSO  := oJSONRet:Mensagem // Store JSON sent to B4U
                 u_PlenMsg("Erro Httpquote: " + _oRDER + " - "+ oOrder:toJson(), "SendB4YouLogPedidoXmlJson")
                 lRet    := .f.
             endif
