@@ -186,7 +186,7 @@ Static Function ConnectB4YouLogOrder(_Order)
         While SC6->(!EOF()) .and. SC6->(C6_FILIAL+C6_NUM) == _Order
 
             oOrderItens := JsonObject():New() // Array to hold order items
-            oOrderItens["NumeroPedido"]     := SC5->C5_NUM
+            oOrderItens["NumeroPedido"]     := SC5->(C5_FILIAL+C5_NUM)
 
             // TODO: REMOVE BEFORE PRODUCTION
             // SB1->(DBSeek(xFilial("SB1") + SC6->C6_PRODUTO )) // Seek product in SB1
