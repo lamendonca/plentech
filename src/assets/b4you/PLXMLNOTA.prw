@@ -9,6 +9,7 @@
 	Tem que estar posicionado na SF2.
 	Funções estraidas dos fontes SPEDNFE, DANFEII)
 /*/
+
 User Function PLXMLNOTA(xCXMLNFE)
 	Local aAreaPP    := GetArea()
 	Local cIdEnt     := ""

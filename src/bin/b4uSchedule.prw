@@ -3,6 +3,7 @@
 
 #DEFINE CRLF CHR( 13 ) + CHR( 10 )
 
+
 User Function b4uschedule()
     Local aData    := { }
     Local nX        := 0

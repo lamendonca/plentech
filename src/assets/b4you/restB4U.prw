@@ -11,6 +11,7 @@
 // Surely your goodness and faithfulness will pursue me all my days - Psalm 23:6
 
 
+
 WSRESTFUL restB4U DESCRIPTION "PLENTECH - REST Web Service para integração " FORMAT "application/json"
 
     //Input data
@@ -52,8 +53,8 @@ WSMETHOD POST WEBHOOK WSSERVICE restB4U
     // "Evento": "EM_CARREGAMENTO"
     // "Id": "028071"
     // }
-    _Order   := AllTrim(oJson:GetJsonText(Upper("Id")))
-    _Status  := AllTrim(oJson:GetJsonText(Upper("Evento")))
+    _Order   := AllTrim(oJson:GetJsonText("Id"))
+    _Status  := AllTrim(oJson:GetJsonText("Evento"))
     u_PlenMsg("Recebido o pedido: " + _Order + " com status: " + _Status, "restB4U", "B4U")
 
     If updateSC5(_Order, _Status, @Message )

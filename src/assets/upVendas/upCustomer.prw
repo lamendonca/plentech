@@ -13,6 +13,7 @@
 // upCustomer.prw - File auxiliar to get customers from Protheus
 // Surely your goodness and faithfulness will pursue me all my days - Psalm 23:6
 
+
 User Function upCustomer(cSearch)
 
     Local cQuery := ""

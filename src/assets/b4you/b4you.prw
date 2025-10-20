@@ -65,6 +65,7 @@
 
 
 
+
 User Function xTestB4U(_Method, _Order)
 
     Local _cEmp         := "01"     // Company code - Check your company code in SM0->M0_CODIGO
@@ -142,9 +143,9 @@ Static Function ConnectB4YouLogOrder(_Order)
     DBSelectArea("SB1")
     SB1->(DbSetOrder(1))
 
-    if SC5->(Found())
+    if SC5->(Found()) .and. SC5->(C5_LIBEROK) == "S" .and. Empty(SC5->(C5_NOTA))
 
-        oOrder["NumeroPedido"]              := SC5->C5_NUM
+        oOrder["NumeroPedido"]              := SC5->(C5_FILIAL+C5_NUM)
         oOrder["CodigoCliente"]             := SC5->C5_CLIENTE
         if !Empty(SC5->C5_EMISSAO)
             oOrder["DataEmissao"]               := SUBSTRING(DTOS(SC5->C5_EMISSAO),1,4)+'-'+SUBSTRING(DTOS(SC5->C5_EMISSAO),5,2)+'-'+SUBSTRING(DTOS(SC5->C5_EMISSAO),7,2)
@@ -382,7 +383,7 @@ Static Function SendB4YouLogPedidoXmlJson(_Order)
     SC5->(DbGoTop())
     SC5->(DBSeek( _Order))
     u_PlenMsg("Enviando pedido XML/JSON: " + _Order, "SendB4YouLogPedidoXmlJson")
-    if SC5->(Found())
+    if SC5->(Found()) 
         DBSelectArea("SF2")
         SF2->(DbSetOrder(1))
         SF2->(DbGoTop())
@@ -407,11 +408,14 @@ Static Function SendB4YouLogPedidoXmlJson(_Order)
                 u_PlenMsg( "Httpquote OK", "Httpquote" ) // Log success message
                 //Log the product as sent to B4U
                 RecLock("SC5", .F.)
-                SC5->B5_XB4U     := "I" // Mark product as sent to B4U
-                SC5->B5_XB4UJSO  := oOrder:ToJson() // Store JSON sent to B4U
+                SC5->C5_XB4U     := "I" // Mark product as sent to B4U
+                SC5->C5_XB4UJSO  := oOrder:ToJson() // Store JSON sent to B4U
                 lRet    := .t.
                 u_PlenMsg("Enviando pedido XML/JSON: " + SC5->C5_NUM, "SendB4YouLogPedidoXmlJson")
             else
+                RecLock("SC5", .F.)
+                SC5->C5_XB4U     := "F" // Mark product as sent to B4U
+                SC5->C5_XB4UJSO  := oOrder:ToJson() // Store JSON sent to B4U
                 u_PlenMsg("Erro Httpquote: " + _oRDER + " - "+ oOrder:toJson(), "SendB4YouLogPedidoXmlJson")
                 lRet    := .f.
             endif

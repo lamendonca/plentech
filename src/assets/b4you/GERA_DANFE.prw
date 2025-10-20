@@ -19,6 +19,7 @@
 #include 'topconn.ch'
 
 
+
 User Function GERADANFE(XCFILIAL,XCNOTA,XCSERIE,XDATA, XTIPO)
 	Local aArea     := GetArea()
 	Local cIdent    := ""
