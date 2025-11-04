@@ -4,6 +4,9 @@
 #Include "json.ch"
 // #Include "fwrest.ch"
 
+#INCLUDE 'TOPCONN.CH'
+
+
 /* Plentech */
 // B4U.prw - REST API with FWRest class
 // This file contains functions to connect to a REST API, send requests, and handle responses.
@@ -68,10 +71,10 @@
 
 User Function xTestB4U(_Method, _Order)
 
-    Local _cEmp         := "01"     // Company code - Check your company code in SM0->M0_CODIGO
-    Local _cFil         := "010002"   // Sucursal code - Check your filial code in SM0->M0_CODFIL
-    Default _Method     := "Cancel"  // Default method to test
-    Default _Order      := "010002000004" // Default order number to test
+    Local _cEmp         := "AC"     // Company code - Check your company code in SM0->M0_CODIGO
+    Local _cFil         := "020003"   // Sucursal code - Check your filial code in SM0->M0_CODFIL
+    Default _Method     := "GetOrder"  // Default method to test
+    Default _Order      := "020003000104" // Default order number to test
 
     If Select("SX2") == 0
         RpcSetEnv(_cEmp, _cFil,NIL, NIL, "FAT")
@@ -84,6 +87,8 @@ User Function xTestB4U(_Method, _Order)
         CancelB4YouLogOrder(_Order)               // Test order cancellation
     elseif lower(_Method) == lower("SendXmlJson")
         SendB4YouLogPedidoXmlJson(_Order) // Test sending XML/JSON data
+    elseif lower(_Method) == lower("GetOrder")
+        GetOrderB4U(_Order) // Test sending XML/JSON data
     else
         u_PlenMsg("Método inválido: " + _Method, "xTestB4U")
     endif
@@ -91,6 +96,7 @@ User Function xTestB4U(_Method, _Order)
 return
 
 User Function integB4U( _Method, aInfo )
+    Local aData := {}
     if _Method == "Product"
         CreateB4YouLogProduct( aInfo )
     elseif _Method == "Order"
@@ -99,10 +105,14 @@ User Function integB4U( _Method, aInfo )
         CancelB4YouLogOrder( aInfo )
     elseif _Method == "SendXmlJson"
         SendB4YouLogPedidoXmlJson( aInfo )
+    elseif _Method == "GetOrder"
+        aData := GetOrderB4U( aInfo )
+    elseif _Method == "SendPurchases"
+        sendPurchasesOrderB4U( aInfo )
     else
         u_PlenMsg("Método inválido: " + _Method, "integB4U")
     endif
-Return
+Return aData 
 
 
 // Static Function to set credentials for REST API -- Bearer Token of Sandbox
@@ -110,11 +120,71 @@ Static Function SetRestBearer()
     Local cBearer   := SuperGetMV("PL_RSTBEAR",   .F.,    "T0xGQToybXk2ZXFjeGlhOHQ0cGI5MWxzNWR3aG8=")
     Local cUrl      := SuperGetMV("PL_RSTURL",        .f.,    "https://sandbox-api.b4youlog.com/v1")
     Local _aHeader  := {}
-    AAdd(_aHeader, 'Content-Type: application/json')
+    AAdd(_aHeader, 'Content-Type: application/json; charset=utf-8')
     AAdd(_aHeader, 'Authorization: Bearer ' + cBearer  )
 
 Return {_aHeader, cUrl }
 
+Static Function sendPurchasesOrderB4U(_PurchasesOrder)
+    Local lReturn := .F.
+    Local cUrl      := "/recebimento/xml-fornecedor" // https://api.b4youlog.com/v1/recebimento/xml-fornecedor?Usuario=&ChaveNFeFornecedor=
+    Local oJSONRet  := Nil
+    Local cHeaderGet:= ""
+    Local aInfo     := '{"xmlNFe":"<xml>...</xml>","usuario":"usuario_teste","chaveNFeFornecedor":"12345678901234567890123456789012345678901234"}' // Example JSON payload
+
+    DBSelectArea("SF1")
+    SF1->(DbSetOrder(1))
+    SF1->(DBSeek( _PurchasesOrder ))
+
+    if SF1->(FOUND())
+        aInfo := '{"usuario":"'+SuperGetMV("PL_B4UUSER", .f., "Schedule")+'","chaveNFeFornecedor":"'+AllTrim(SF1->F1_CHVNFE)+'"}'
+        FWJsonDeserialize(Httpquote(  ;
+            /*url*/ SetRestBearer()[2]+cUrl ,;
+            /* Method*/ 'POST',;
+            /* cGetParms */ ,;
+            /* cPostParms */ aInfo ,;
+            /* nTimeOut */80,;
+            /* aHeadrStr */ SetRestBearer()[1],;
+            /* cHeaderGet */ @cHeaderGet  ), @oJSONRet)
+        if Val(SubStr(strtokarr(cHeaderGet, Chr(10))[1], 10, 3)) == 200 // Check if the HTTP status code is 200 OK
+            u_PlenMsg( "Httpquote OK - Pedido retornado: " + aInfo, "sendPurchasesOrderB4U" ) // Log success message
+            lReturn    := .t.
+            SF1->(RecLock(.F.))
+            SF1->F1_XB4URET := oJSONRet:Mensagem
+            SF1->(MSUnlock())
+
+        else
+            u_PlenMsg("Erro Httpquote: " + aInfo , "sendPurchasesOrderB4U")
+        EndIf
+    EndIf
+
+Return lReturn
+Static Function GetOrderB4U(_Order)
+
+    Local cUrl      := "/pedido?numeroPedido=" //https://api.b4youlog.com/v1/pedido?numeroPedido=numeroDoPedido
+    Local oJSONRet  := Nil
+    Local lRet      := .F. // Return value
+    Local cHeaderGet:= ""
+    Local aReturn   := {}
+    FWJsonDeserialize(Httpquote(  ;
+        /*url*/ SetRestBearer()[2]+cUrl+_Order ,;
+        /* Method*/ 'GET',;
+        /* cGetParms */ ,;
+        /* cPostParms */ ,;
+        /* nTimeOut */80,;
+        /* aHeadrStr */ SetRestBearer()[1],;
+        /* cHeaderGet */ @cHeaderGet  ), @oJSONRet)
+    if Val(SubStr(strtokarr(cHeaderGet, Chr(10))[1], 10, 3)) == 200 // Check if the HTTP status code is 200 OK
+        u_PlenMsg( "Httpquote OK - Pedido retornado: " + _Order, "GetOrderB4U" ) // Log success message
+        lRet    := .t.
+        aReturn:= {lRet, {val(ojsonret[1]:dados:pedido:pesototal), val(ojsonret[1]:dados:pedido:totalcaixas)}}
+    else
+        u_PlenMsg("Erro Httpquote: " + _Order , "GetOrderB4U")
+        aReturn:= {lRet, {oJsonRet:Mensagem, 0}}
+    EndIf
+
+    varinfo("aReturn GetOrderB4U", aReturn)
+return aReturn
 
 // Static function to connect and send a POST request to B4YouLog API
 Static Function ConnectB4YouLogOrder(_Order)
@@ -143,7 +213,11 @@ Static Function ConnectB4YouLogOrder(_Order)
     DBSelectArea("SB1")
     SB1->(DbSetOrder(1))
 
-    if SC5->(Found()) .and. SC5->(C5_LIBEROK) == "S" .and. Empty(SC5->(C5_NOTA))
+
+    if SC5->(Found()) .and. ;
+            ((SC5->(C5_LIBEROK) == "S" .and. Empty(SC5->(C5_NOTA)) .and. xValidC9B4U( _Order )) .Or. ;
+            SC5->C5_XB4U == "1") // Check if order is released and not invoiced and valid to B4U or marked as priority to send
+
 
         oOrder["NumeroPedido"]              := SC5->(C5_FILIAL+C5_NUM)
         oOrder["CodigoCliente"]             := SC5->C5_CLIENTE
@@ -151,7 +225,7 @@ Static Function ConnectB4YouLogOrder(_Order)
             oOrder["DataEmissao"]               := SUBSTRING(DTOS(SC5->C5_EMISSAO),1,4)+'-'+SUBSTRING(DTOS(SC5->C5_EMISSAO),5,2)+'-'+SUBSTRING(DTOS(SC5->C5_EMISSAO),7,2)
         ENDIF
         oOrder["CnpjTransportadora"]        := Posicione("SA4", 1, xFilial("SA4")+SC5->C5_TRANSP, "A4_CGC")
-        if !Empty(SC5->(C5_SERIE+C5_NOTA))
+        if !Empty(SC5->(C5_SERIE+C5_NOTA)) .and. !Empty(SC5->C5_EMISSAO)
             oOrder["DataFaturamento"]           := SUBSTRING(DTOS(SC5->C5_EMISSAO),1,4)+'-'+SUBSTRING(DTOS(SC5->C5_EMISSAO),5,2)+'-'+SUBSTRING(DTOS(SC5->C5_EMISSAO),7,2)
         endif
         oOrder["TipoCanalVenda"]            := "4"                  // 1 = CORPORATIVO; 2 = ATACADO; 3 = TELEVENDAS; 4 = SITE; 5 = MARKETPLACE; 7 = LICITACAO
@@ -161,14 +235,14 @@ Static Function ConnectB4YouLogOrder(_Order)
 
         // Clientes
         IF SA1->(Found())
-            oOrder["NomeCliente"]           := Alltrim(SA1->A1_NOME)
-            oOrder["EnderecoCliente"]       := Alltrim(SA1->A1_END)
-            oOrder["BairroCliente"]         := Alltrim(SA1->A1_BAIRRO)
-            oOrder["MunicipioCliente"]      := Alltrim(SA1->A1_MUN)
-            oOrder["CepCLiente"]            := Alltrim(SA1->A1_CEP)
-            oOrder["EstadoCliente"]         := Alltrim(SA1->A1_EST)
-            oOrder["CnpjCpfCliente"]        := Alltrim(SA1->A1_CGC)
-            oOrder["IeCliente"]             := Alltrim(SA1->A1_INSCR)
+            oOrder["NomeCliente"]           := u_xSemCarc(Alltrim(SA1->A1_NOME))
+            oOrder["EnderecoCliente"]       := u_xSemCarc(Alltrim(SA1->A1_END))
+            oOrder["BairroCliente"]         := u_xSemCarc(Alltrim(SA1->A1_BAIRRO))
+            oOrder["MunicipioCliente"]      := u_xSemCarc(Alltrim(SA1->A1_MUN))
+            oOrder["CepCLiente"]            := u_xSemCarc(Alltrim(SA1->A1_CEP))
+            oOrder["EstadoCliente"]         := u_xSemCarc(Alltrim(SA1->A1_EST))
+            oOrder["CnpjCpfCliente"]        := u_xSemCarc(Alltrim(SA1->A1_CGC))
+            oOrder["IeCliente"]             := u_xSemCarc(Alltrim(SA1->A1_INSCR))
         Else
             // If the client is not found, set dummy values to complete the json object
             oOrder["NomeCliente"]           := "Cliente não encontrado"
@@ -383,7 +457,7 @@ Static Function SendB4YouLogPedidoXmlJson(_Order)
     SC5->(DbGoTop())
     SC5->(DBSeek( _Order))
     u_PlenMsg("Enviando pedido XML/JSON: " + _Order, "SendB4YouLogPedidoXmlJson")
-    if SC5->(Found()) 
+    if SC5->(Found())
         DBSelectArea("SF2")
         SF2->(DbSetOrder(1))
         SF2->(DbGoTop())
@@ -411,12 +485,14 @@ Static Function SendB4YouLogPedidoXmlJson(_Order)
                 SC5->C5_XB4U     := "I" // Mark product as sent to B4U
                 SC5->C5_XB4UJSO  := oOrder:ToJson() // Store JSON sent to B4U
                 lRet    := .t.
+                SC5->(MSUnlock())
                 u_PlenMsg("Enviando pedido XML/JSON: " + SC5->C5_NUM, "SendB4YouLogPedidoXmlJson")
             else
                 RecLock("SC5", .F.)
                 SC5->C5_XB4U     := "F" // Mark product as sent to B4U
                 SC5->C5_XB4UJSO  := oJSONRet:Mensagem // Store JSON sent to B4U
                 u_PlenMsg("Erro Httpquote: " + _oRDER + " - "+ oOrder:toJson(), "SendB4YouLogPedidoXmlJson")
+                SC5->(MSUnlock())
                 lRet    := .f.
             endif
         Else
@@ -448,3 +524,30 @@ Static Function _FoundXml( cOption, Serie, Nota, Cliente, Loja, Filial, xData )
             cReturn := ""
     EndCase
 Return cReturn
+
+Static Function xValidC9B4U( _Order )
+    Local lValid := .t.
+    Local cQuery := ""
+    Local cAlias := GetNextAlias()
+
+    cQuery := " SELECT DISTINCT                                 " + CRLF
+    cQuery += " *                                               " + CRLF
+    cQuery += " FROM                                            " + CRLF
+    cQuery += " 	" + RetSQLName("SC9") + " C9                " + CRLF
+    cQuery += " WHERE                                           " + CRLF
+    cQuery += "  C9.D_E_L_E_T_    != '*'                        " + CRLF
+    cQuery += "  AND C9.C9_BLEST  != ' '                        " + CRLF
+    cQuery += "  AND C9.C9_BLCRED != ' '                        " + CRLF
+    cQuery += " AND C9.C9_FILIAL = '" + SubStr(_Order,1,6) + "' " + CRLF
+    cQuery += " and C9.C9_PEDIDO = '" + SubStr(_Order,7,6) + "' " + CRLF
+
+    cQuery := ChangeQuery(cQuery)
+    varInfo("Consulta de produto na SC9 -> cQuery",   cQuery)
+    TcQuery cQuery New Alias (cAlias)
+
+    While (cAlias)->(!EOF())
+        lValid := .f.
+        (cAlias)->(DBSkip())
+    enddo
+
+Return lValid
