@@ -70,6 +70,7 @@ Return
 
 Static Function updateSC5( Order, Status, Message  )
     Local lRet      := .F.
+    Local cStatus   := SuperGetMV("PL_B4UAUTH", .f., "AGUARDANDO_NF_PARA_EXPEDICAO") // This status able the order to be invoiced
     DBSelectArea("SC5")
     SC5->(DbSetOrder(1))
     SC5->(DbGoTop())
@@ -78,20 +79,21 @@ Static Function updateSC5( Order, Status, Message  )
     if SC5->(Found())
         lRet := .T.
         u_PlenMsg("Pedido encontrado: " + Order, "restB4U", "B4U")
-        // if !(SC5->C5_XB4U == "S") //TODO: REMOVE
-            RecLock("SC5",.F. )
-            u_PlenMsg("Atualizando status do pedido: " + Order + " para " + Status, "restB4U", "B4U")
-            SC5->C5_XB4USTA := Status 
-            SC5->C5_XB4UJSO :=  StatusRet(Status)
-            Message  := '{ "mensagem": "Status do pedido atualizado com sucesso!" }'
-            u_PlenMsg(Message, "restB4U", "B4U")
-            SC5->(MSUnlock())
-        // Else //TODO: REMOVE
-        //     Message  := '{ "mensagem": "Status do pedido não pode ser atualizado!" }'
-        //     u_PlenMsg(Message, "restB4U", "B4U")
-        //     ::SetResponse(Message)
-        //     ::SetStatus( 400 )
-        // endif
+        RecLock("SC5",.F. )
+        u_PlenMsg("Atualizando status do pedido: " + Order + " para " + Status, "restB4U", "B4U")
+        SC5->C5_XB4USTA := Status
+        SC5->C5_XB4UJSO :=  StatusRet(Status)
+        if Alltrim(Status) == cStatus // if empty, set the date
+            aGetOrder := u_integB4U("GetOrder", Order ) //get details of order from B4U
+            varInfo("Retorno GetOrder ->IntegB4U -> aGetOrder",   aGetOrder)
+            SC5->C5_PESOL       := aGetOrder[2][1] // Weight
+            SC5->C5_PBRUTO      := aGetOrder[2][1] // Weight
+            SC5->C5_VOLUME1     := aGetOrder[2][2] // Volume
+            SC5->C5_ESPECI1     := SuperGetMV("PL_ESPECIE",.f., "CX") // Volume
+        endif
+        Message  := '{ "mensagem": "Status do pedido atualizado com sucesso!" }'
+        u_PlenMsg(Message, "restB4U", "B4U")
+        SC5->(MSUnlock())
     Else
         Message  := '{ "mensagem": "Pedido '+Order+' não encontrado!" }'
         u_PlenMsg(Message, "restB4U", "B4U")
