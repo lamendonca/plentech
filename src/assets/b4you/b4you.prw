@@ -73,7 +73,7 @@ User Function xTestB4U(_Method, _Order)
 
     Local _cEmp         := "AC"     // Company code - Check your company code in SM0->M0_CODIGO
     Local _cFil         := "020003"   // Sucursal code - Check your filial code in SM0->M0_CODFIL
-    Default _Method     := "GetOrder"  // Default method to test
+    Default _Method     := "Order"  // Default method to test
     Default _Order      := "020003000104" // Default order number to test
 
     If Select("SX2") == 0
@@ -112,7 +112,7 @@ User Function integB4U( _Method, aInfo )
     else
         u_PlenMsg("Método inválido: " + _Method, "integB4U")
     endif
-Return aData 
+Return aData
 
 
 // Static Function to set credentials for REST API -- Bearer Token of Sandbox
@@ -177,7 +177,7 @@ Static Function GetOrderB4U(_Order)
     if Val(SubStr(strtokarr(cHeaderGet, Chr(10))[1], 10, 3)) == 200 // Check if the HTTP status code is 200 OK
         u_PlenMsg( "Httpquote OK - Pedido retornado: " + _Order, "GetOrderB4U" ) // Log success message
         lRet    := .t.
-        aReturn:= {lRet, {val(ojsonret[1]:dados:pedido:pesototal), val(ojsonret[1]:dados:pedido:totalcaixas)}}
+        aReturn:= {lRet, {val(ojsonret[1]:dados:pedido:pesototal), val(ojsonret[1]:dados:pedido:totalcaixas), STATUSRET(Alltrim(ojsonret[1]:dados:pedido:descricaostatus)), ojsonret[1]:dados:itens} }
     else
         u_PlenMsg("Erro Httpquote: " + _Order , "GetOrderB4U")
         aReturn:= {lRet, {oJsonRet:Mensagem, 0}}
@@ -206,6 +206,10 @@ Static Function ConnectB4YouLogOrder(_Order)
     SC6->(DbSetOrder(1))
     SC6->(DBSeek( _Order ))
 
+    DBSelectArea("SC9")
+    SC9->(DbSetOrder(1)) ////C9_FILIAL+C9_PEDIDO+C9_ITEM+C9_SEQUEN+C9_PRODUTO+C9_BLEST+C9_BLCRED
+    SC9->(DBSeek( _Order )) // Filial + Pedido
+
     DBSelectArea("SA1")
     SA1->(DbSetOrder(1))
     SA1->(DBSeek(xFilial("SA1")+ SC5->(C5_CLIENTE+C5_LOJACLI) ))
@@ -215,8 +219,9 @@ Static Function ConnectB4YouLogOrder(_Order)
 
 
     if SC5->(Found()) .and. ;
-            ((SC5->(C5_LIBEROK) == "S" .and. Empty(SC5->(C5_NOTA)) .and. xValidC9B4U( _Order )) .Or. ;
-            SC5->C5_XB4U == "1") // Check if order is released and not invoiced and valid to B4U or marked as priority to send
+            ((SC5->(C5_LIBEROK) == "S" .and. Empty(SC5->(C5_NOTA));
+            .and. xValidC9B4U( _Order ) ); // I'll use this because get the both fields and check if the order is valid to B4U
+            .Or. SC5->C5_XB4U == "1") // Check if order is released and not invoiced and valid to B4U or marked as priority to send
 
 
         oOrder["NumeroPedido"]              := SC5->(C5_FILIAL+C5_NUM)
@@ -275,7 +280,12 @@ Static Function ConnectB4YouLogOrder(_Order)
             // lRet    := .F.
             // endif
             oOrderItens["CodigoProduto"]            := Alltrim(SC6->C6_PRODUTO)
-            oOrderItens["QtdVendida"]               := StrTran(AllTrim(TRANSFORM(SC6->C6_QTDVEN,"@E 99999999.9999")),",",".")
+            SC9->(DBSeek( _Order+SC6->C6_ITEM )) //C9_FILIAL+C9_PEDIDO+C9_ITEM+C9_SEQUEN+C9_PRODUTO+C9_BLEST+C9_BLCRED
+            if SC9->(Found()) .and. SC9->C9_PRODUTO == SC6->C6_PRODUTO
+                oOrderItens["QtdVendida"]               := StrTran(AllTrim(TRANSFORM(SC9->C9_QTDLIB,"@E 99999999.9999")),",",".")
+            else
+                oOrderItens["QtdVendida"]               := StrTran(AllTrim(TRANSFORM(SC6->C6_QTDVEN,"@E 99999999.9999")),",",".") // alterado para SC9
+            endif
             oOrderItens["PrecoVenda"]               := StrTran(AllTrim(TRANSFORM(SC6->C6_VALOR,"@E 99999999.9999")),",",".")
             oOrderItens["ValorItem"]                := StrTran(AllTrim(TRANSFORM(SC6->C6_PRCVEN,"@E 99999999.9999")),",",".")
             oOrderItens["Almoxarifado"]             := ""
@@ -551,3 +561,30 @@ Static Function xValidC9B4U( _Order )
     enddo
 
 Return lValid
+
+
+Static Function StatusRet(Status)
+    Do Case
+        // Status := "AVISO_RECEBIMENTO"
+        // Status := "CONFERENCIA_RECEBIMENTO"
+        // Status := "BLOQUEIO"
+        Case Status == "Em Carregamento"
+            Status := "EM_CARREGAMENTO"
+        Case Status == "Expedido"
+            Status := "EXPEDIDO"
+        Case Status == "Cancelado"
+            Status := "CANCELADO"
+        Case Status == "Aguardando Início Separação"
+            Status := "Aguardando Início Separação"
+        Case Status == "Em Separação"
+            Status := "Em Separação"
+        Case Status == "Aguardando Checkout"
+            Status := "Aguardando Checkout"
+        Case Status == "Aguardando NF p/ expedição"
+            Status := "AGUARDANDO_NF_PARA_EXPEDICAO"
+        Case Status == "NF Recebida"
+        Otherwise
+            Status := Status
+    End Case
+
+Return Upper(Status)

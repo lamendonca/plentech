@@ -82,14 +82,16 @@ Static Function updateSC5( Order, Status, Message  )
         RecLock("SC5",.F. )
         u_PlenMsg("Atualizando status do pedido: " + Order + " para " + Status, "restB4U", "B4U")
         SC5->C5_XB4USTA := Status
-        SC5->C5_XB4UJSO :=  StatusRet(Status)
+        // SC5->C5_XB4UJSO :=  StatusRet(Alltrim(Status))
         if Alltrim(Status) == cStatus // if empty, set the date
             aGetOrder := u_integB4U("GetOrder", Order ) //get details of order from B4U
             varInfo("Retorno GetOrder ->IntegB4U -> aGetOrder",   aGetOrder)
-            SC5->C5_PESOL       := aGetOrder[2][1] // Weight
-            SC5->C5_PBRUTO      := aGetOrder[2][1] // Weight
-            SC5->C5_VOLUME1     := aGetOrder[2][2] // Volume
-            SC5->C5_ESPECI1     := SuperGetMV("PL_ESPECIE",.f., "CX") // Volume
+            if aGetOrder[1] == .t.
+                SC5->C5_PESOL       := aGetOrder[2][1] // Weight
+                SC5->C5_PBRUTO      := aGetOrder[2][1] // Weight
+                SC5->C5_VOLUME1     := aGetOrder[2][2] // Volume
+                SC5->C5_ESPECI1     := SuperGetMV("PL_ESPECIE",.f., "CX") // Volume
+            endif
         endif
         Message  := '{ "mensagem": "Status do pedido atualizado com sucesso!" }'
         u_PlenMsg(Message, "restB4U", "B4U")
@@ -106,20 +108,21 @@ Return lRet
 Static Function StatusRet(Status)
     Do Case
         Case Status == "EM_CARREGAMENTO"
-            Status := '{ "mensagem": "Disparado após a impressão da minuta de recebimento na b4you, neste cenário o Id é a chave eletrônica da NFe (44 dígitos)!" }'
+            Status := 'Disparado após a impressão da minuta de recebimento na b4you, neste cenário o Id é a chave eletrônica da NFe (44 dígitos)!'
         Case Status == "AVISO_RECEBIMENTO"
-            Status := '{ "mensagem": "Disparado após a conferencia/bipagem das mercadorias recebidas pela b4you, neste cenário o Id é a chave eletrônica da NFe (44 dígitos)!" }'
+            Status := 'Disparado após a conferencia/bipagem das mercadorias recebidas pela b4you, neste cenário o Id é a chave eletrônica da NFe (44 dígitos)!'
         Case Status == "CONFERENCIA_RECEBIMENTO"
-            Status := '{ "mensagem": "Disparado no final da confirmação do pedido no Checkout, neste cenário o Id é o número do pedido!" }'
+            Status := 'Disparado no final da confirmação do pedido no Checkout, neste cenário o Id é o número do pedido!'
         Case Status == "AGUARDANDO_NF_PARA_EXPEDICAO"
-            Status := '{ "mensagem": "Disparado após a consolidação dos pedidos no Pré-carregamento (pedido pronto para ser expedido), neste cenário o Id é o número do pedido!" }'
+            Status := 'Disparado após a consolidação dos pedidos no Pré-carregamento (pedido pronto para ser expedido), neste cenário o Id é o número do pedido!'
         Case Status == "BLOQUEIO"
-            Status := '{ "mensagem": "Disparado caso ocorre algum bloqueio no pedido, neste cenário o Id é o número do pedido!" }'
+            Status := 'Disparado caso ocorre algum bloqueio no pedido, neste cenário o Id é o número do pedido!'
         Case Status == "CANCELADO"
-            Status := '{ "mensagem": "Disparado caso o pedido seja cancelado, neste cenário o Id é o número do pedido!" }'
+            Status := 'Disparado caso o pedido seja cancelado, neste cenário o Id é o número do pedido!'
         Case Status == "EXPEDIDO"
-            Status := '{ "mensagem": "Disparado quando a minuta de expedição está finalizada, neste cenário o Id é o número do pedido!" }'
+            Status := 'Disparado quando a minuta de expedição está finalizada, neste cenário o Id é o número do pedido!'
         Otherwise
-            Status := '{ "mensagem": "Status desconhecido!" }'
+            Status := 'Status desconhecido!'
     End Case
 Return Status
+

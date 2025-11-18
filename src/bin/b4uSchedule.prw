@@ -12,6 +12,7 @@ User Function b4uschedule()
     // Local aTables   := SuperGetMv("PL_B4UTABLE",.f.,{  "SC5" })   // Tables to be used in the B4U integration
     Private Rows    := SuperGetMv("PL_B4UROW", .f., 100)                // Number of rows to be processed in each table
     Private lJob    := FwGetRunSchedule()
+
     u_PlenMsg( "Carregando os dados para serem atualizados. " + Dtoc( Date( ) ) )
 
     // Send xml to B4U
@@ -31,11 +32,17 @@ User Function b4uschedule()
         EndIf
     next nX
 
+    // Get status order from B4U
+    aData  := xDados( "SC5", Rows, " C5_NOTA =' ' AND C5_XB4U='S' AND C5_XB4USTA<> 'AGUARDANDO_NF_PARA_EXPEDICAO' " ) // get orders to send
+    For nX := 1 to len(aData)
+        u_PlenMsg( "Verificando status do pedido: " + aData[nX][2] , "b4uSchedule", "B4U" )
+        u_updB4U( aData[nX][2] )
+    Next nX
 
 Return Nil
 
 User Function b4uinteg()
-    	Processa({|| u_b4uschedule()})
+    Processa({|| u_b4uschedule()})
 
 
 Return Nil
@@ -56,12 +63,12 @@ Static Function xDados( Table, Rows, Extra )
                     u_PlenMsg("Pedido cancelado: " + (cAlias)->(C5_FILIAL+C5_NUM), "xDados", "B4U")
                     // aAdd(aDados, {Table, (cAlias)->(C5_FILIAL+C5_NUM)})
                     u_integB4U( "Cancel" , (cAlias)->(C5_FILIAL+C5_NUM) )
-                    elseif (cAlias)->(C5_XB4U) =="S" .and.; // Orders integrated successfully
-                            !Empty((cAlias)->(C5_NOTA)) .and.; // and with invoice issued
-                            (cAlias)->(C5_NOTA)!='XXXXXX' // and not canceled invoice
-                        u_PlenMsg("XML para enviar: " + (cAlias)->(C5_FILIAL+C5_NUM), "xDados", "B4U")
-                        // aAdd(aDados, {Table, (cAlias)->(C5_FILIAL+C5_NUM)})
-                        u_integB4U( "SendXmlJson" , (cAlias)->(C5_FILIAL+C5_NUM) )
+                elseif (cAlias)->(C5_XB4U) =="S" .and.; // Orders integrated successfully
+                        !Empty((cAlias)->(C5_NOTA)) .and.; // and with invoice issued
+                        (cAlias)->(C5_NOTA)!='XXXXXX' // and not canceled invoice
+                    u_PlenMsg("XML para enviar: " + (cAlias)->(C5_FILIAL+C5_NUM), "xDados", "B4U")
+                    // aAdd(aDados, {Table, (cAlias)->(C5_FILIAL+C5_NUM)})
+                    u_integB4U( "SendXmlJson" , (cAlias)->(C5_FILIAL+C5_NUM) )
                 else // orders not canceled and to be sent
                     aAdd(aDados, {Table, (cAlias)->(C5_FILIAL+C5_NUM)})
                 endif

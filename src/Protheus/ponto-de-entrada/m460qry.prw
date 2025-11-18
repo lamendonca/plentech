@@ -3,7 +3,7 @@ User Function M460QRY()
 
     Local cQuery    :=paramixb[1]
     Local cCodQry   := paramixb[2]
-    Local cFilter   := " AND C9_BLEST == ' ' AND C9_BLCRED == ' ' "
+    Local cFilter   := " AND C9_BLEST = ' ' AND C9_BLCRED = ' ' "
     Local cStatus   := SuperGetMV("PL_B4UAUTH", .f., "AGUARDANDO_NF_PARA_EXPEDICAO") // This status able the order to be invoiced
 
     cQuery += cFilter
